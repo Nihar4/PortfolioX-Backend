@@ -9,20 +9,20 @@ export const splitAllStocks = catchAsyncError(async (req, res, next) => {
         );
         const data = response.data.data;
 
-        const symbolsWithoutPeriod = data.filter(symbol => !symbol.symbol.includes(".")).slice(0, 1000);
+        const symbolsWithoutPeriod = data.filter(symbol => !symbol.symbol.includes(".")).slice(0, 20);
         console.log(symbolsWithoutPeriod.length);
         const totalSymbols = symbolsWithoutPeriod.length;
-        const partSize = Math.ceil(totalSymbols / 4);
+        const partSize = Math.ceil(totalSymbols / 2);
 
         // Divide the symbols into four parts
         const part1 = symbolsWithoutPeriod.slice(0, partSize).map((item) => item.symbol);
         const part2 = symbolsWithoutPeriod.slice(partSize, 2 * partSize).map((item) => item.symbol);
-        const part3 = symbolsWithoutPeriod.slice(2 * partSize, 3 * partSize).map((item) => item.symbol);
-        const part4 = symbolsWithoutPeriod.slice(3 * partSize).map((item) => item.symbol);
+        // const part3 = symbolsWithoutPeriod.slice(2 * partSize, 3 * partSize).map((item) => item.symbol);
+        // const part4 = symbolsWithoutPeriod.slice(3 * partSize).map((item) => item.symbol);
 
         res.status(201).json({
             success: true,
-            part1, part2, part3, part4
+            part1, part2
         });
     }
     catch (error) {
@@ -83,11 +83,11 @@ export const mergeAllStocks = catchAsyncError(async (req, res, next) => {
 
     const part1data = req.body.part1data;
     const part2data = req.body.part2data;
-    const part3data = req.body.part3data;
-    const part4data = req.body.part4data;
-    console.log(part1data);
+    // const part3data = req.body.part3data;
+    // const part4data = req.body.part4data;
+    // console.log(part1data);
 
-    console.log(part1data.length, part2data.length, part3data.length, part4data.length);
+    // console.log(part1data.length, part2data.length, part3data.length, part4data.length);
     try {
         const result = await Stocks.deleteMany({});
         console.log(`Deleted ${result.deletedCount} documents.`);
@@ -96,8 +96,8 @@ export const mergeAllStocks = catchAsyncError(async (req, res, next) => {
     }
     await merge(part1data);
     await merge(part2data);
-    await merge(part3data);
-    await merge(part4data);
+    // await merge(part3data);
+    // await merge(part4data);
 
     res.status(201).json({
         success: true,
