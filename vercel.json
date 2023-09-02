@@ -5,12 +5,12 @@
   "routes": [{ "src": "/(.*)", "dest": "/server.js" }],
   "crons": [
     {
-      "path": "/api/v1/createallstocks2",
-      "schedule": "0 0 0 2 * *"
+      "path": "https://portfolio-x-two.vercel.app/api/v1/createallstocks1",
+      "schedule": "10 5 * * 0"
     },
     {
-      "path": "/api/v1/createallstocks1",
-      "schedule": "0 0 0 3 * *"
+      "path": "https://portfolio-x-two.vercel.app/api/v1/createallstocks2",
+      "schedule": "10 6 * * 0"
     }
   ]
   
