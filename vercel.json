@@ -4,13 +4,13 @@
   "builds": [{ "src": "server.js", "use": "@vercel/node" }],
   "routes": [{ "src": "/(.*)", "dest": "/server.js" }],
   "functions": {
-    "api/v1/createallstocks2": {
-      "handler": "server.js",
-      "schedule": "0 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *"
-    },
-    "api/v1/createallstocks1": {
+    "cron-createallstocks1": {
       "handler": "server.js",
       "schedule": "0 0 */2 * * *"
+    },
+    "cron-createallstocks2": {
+      "handler": "server.js",
+      "schedule": "0 0 1,3,5,7,9,11,13,15,17,19,21,23 * * *"
     }
   }
 }
