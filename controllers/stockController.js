@@ -1,15 +1,17 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import { Stocks } from "../models/stock.js";
 import axios from "axios";
+import { Temp } from "../models/temp.js";
 
-export const splitAllStocks = catchAsyncError(async (req, res, next) => {
+
+export const createAllStocks = catchAsyncError(async (req, res, next) => {
     try {
         const response = await axios.get(
             "https://api.twelvedata.com/stocks?mic_code=XNSE&source=docs"
         );
         const data = response.data.data;
 
-        const symbolsWithoutPeriod = data.filter(symbol => !symbol.symbol.includes(".")).slice(0, 20);
+        const symbolsWithoutPeriod = data.filter(symbol => !symbol.symbol.includes("."));
         console.log(symbolsWithoutPeriod.length);
         const totalSymbols = symbolsWithoutPeriod.length;
         const partSize = Math.ceil(totalSymbols / 2);
@@ -17,60 +19,100 @@ export const splitAllStocks = catchAsyncError(async (req, res, next) => {
         // Divide the symbols into four parts
         const part1 = symbolsWithoutPeriod.slice(0, partSize).map((item) => item.symbol);
         const part2 = symbolsWithoutPeriod.slice(partSize, 2 * partSize).map((item) => item.symbol);
-        // const part3 = symbolsWithoutPeriod.slice(2 * partSize, 3 * partSize).map((item) => item.symbol);
-        // const part4 = symbolsWithoutPeriod.slice(3 * partSize).map((item) => item.symbol);
 
-        res.status(201).json({
-            success: true,
-            part1, part2
-        });
-    }
-    catch (error) {
-        console.log("enable to split ", error);
-    }
-});
-
-export const createAllStocks = catchAsyncError(async (req, res, next) => {
-    try {
-        const part = req.body.part;
         // console.log(part);
         const logoData = await Promise.all(
-            part.map(async (symbol) => {
+            part1.map(async (symbol) => {
                 // console.log(symbol);
                 const s = symbol + ".NS";
                 const url = `https://query1.finance.yahoo.com/v7/finance/options/${s}?modules=financialData`;
                 return fetchStockDataWithRetries(url);
             })
         );
+
         const filteredLogoData1 = logoData.filter((item) => item !== null);
         const filteredLogoData = filteredLogoData1.filter(
             (item) => item.regularMarketChangeRS !== null && item.CurrentPrice !== null && item.regularMarketChangePercent !== null && item.regularMarketPreviousClose !== null
         );
-        // try {
-        //     const result = await Stocks.deleteMany({});
-        //     console.log(`Deleted ${result.deletedCount} documents.`);
-        // } catch (error) {
-        //     console.error('Error deleting documents:', error);
-        // }
-        // filteredLogoData.forEach(async (data) => {
-        //     try {
-        //         const stock = await Stocks.create({
-        //             name: data.name,
-        //             symbol: data.symbol,
-        //             CurrentPrice: data.CurrentPrice,
-        //             regularMarketChangeRS: data.regularMarketChangeRS,
-        //             regularMarketPreviousClose: data.regularMarketPreviousClose,
-        //             regularMarketChangePercent: data.regularMarketChangePercent
-        //         });
+        try {
+            const result = await Temp.deleteMany({});
+            console.log(`Deleted ${result.deletedCount} documents.`);
+        } catch (error) {
+            console.error('Error deleting documents:', error);
+        }
+        try {
+            const stocktemp = await Temp.create({
+                part1: filteredLogoData
+            });
 
-        //         // You can do something with the 'stock' instance here if needed
-        //     } catch (error) {
-        //         console.error("Error creating stock:", error);
-        //     }
-        // });
+            // You can do something with the 'stock' instance here if needed
+        } catch (error) {
+            console.error("Error creating stocktemp:", error);
+        }
+
         res.status(201).json({
             success: true,
-            filteredLogoData
+        });
+    } catch (error) {
+        console.log("error2 ", error);
+        return null;
+    }
+});
+
+export const createAllStocks2 = catchAsyncError(async (req, res, next) => {
+    try {
+        const response = await axios.get(
+            "https://api.twelvedata.com/stocks?mic_code=XNSE&source=docs"
+        );
+        const data = response.data.data;
+
+        const symbolsWithoutPeriod = data.filter(symbol => !symbol.symbol.includes("."));
+        console.log(symbolsWithoutPeriod.length);
+        const totalSymbols = symbolsWithoutPeriod.length;
+        const partSize = Math.ceil(totalSymbols / 2);
+
+        // Divide the symbols into four parts
+        const part1 = symbolsWithoutPeriod.slice(0, partSize).map((item) => item.symbol);
+        const part2 = symbolsWithoutPeriod.slice(partSize, 2 * partSize).map((item) => item.symbol);
+
+        // console.log(part);
+        const logoData = await Promise.all(
+            part2.map(async (symbol) => {
+                // console.log(symbol);
+                const s = symbol + ".NS";
+                const url = `https://query1.finance.yahoo.com/v7/finance/options/${s}?modules=financialData`;
+                return fetchStockDataWithRetries(url);
+            })
+        );
+
+        const filteredLogoData1 = logoData.filter((item) => item !== null);
+        const filteredLogoData = filteredLogoData1.filter(
+            (item) => item.regularMarketChangeRS !== null && item.CurrentPrice !== null && item.regularMarketChangePercent !== null && item.regularMarketPreviousClose !== null
+        );
+        const part1data = await Temp.find({});
+        console.log(part1data[0].part1)
+        try {
+            const result = await Temp.deleteMany({});
+            console.log(`Deleted ${result.deletedCount} documents.`);
+        } catch (error) {
+            console.error('Error deleting documents:', error);
+        }
+        try {
+            const stocktemp = await Temp.create({
+                part1: part1data[0].part1,
+                part2: filteredLogoData
+            });
+
+            // You can do something with the 'stock' instance here if needed
+        } catch (error) {
+            console.error("Error creating stocktemp:", error);
+        }
+        const part2data = await Temp.find({});
+        console.log(part2data[0].part2)
+
+        await axios.post('https://portfolio-x-two.vercel.app/api/v1/mergeAllStocks', { "part1data": part1data[0].part1, "part2data": part2data[0].part2 });
+        res.status(201).json({
+            success: true,
         });
     } catch (error) {
         console.log("error2 ", error);
@@ -125,6 +167,8 @@ const merge = async (part) => {
         }
     });
 }
+
+
 const fetchStockDataWithRetries = async (url) => {
     try {
         const response = await axios.get(url);
@@ -171,6 +215,7 @@ const fetchStockDataWithRetries = async (url) => {
     }
 
 }
+
 export const getAllStocks = catchAsyncError(async (req, res, next) => {
     const stocks = await Stocks.find({
     });
