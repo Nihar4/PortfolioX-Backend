@@ -17,47 +17,47 @@ const getsymbols = async () => {
 getsymbols();
 
 let part1data = [], part2data = [], part3data = [], part4data = [];
-nodeCron.schedule("0 30 */2 * * *", async () => {
+nodeCron.schedule("0 0 0,4,8,12,16,20 * * *", async () => {
     try {
         console.log(part1);
         part1data = await axios.post('https://portfolio-x-two.vercel.app/api/v1/createallstocks', { "part": part1 });
-        console.log(part1data)
+        part1data = part1data.data.filteredLogoData;
     } catch (error) {
         console.log(error);
     }
 });
-nodeCron.schedule("0 35 */2 * * *", async () => {
+nodeCron.schedule("0 0 1,5,9,13,17,21 * * *", async () => {
     try {
         console.log(part2)
         part2data = await axios.post('https://portfolio-x-two.vercel.app/api/v1/createallstocks', { "part": part2 });
-
+        part2data = part2data.data.filteredLogoData;
     } catch (error) {
         console.log(error);
     }
 });
-nodeCron.schedule("0 40 */2 * * *", async () => {
+nodeCron.schedule("0 0 2,6,10,14,18,22 * * *", async () => {
     try {
-        console.log("hello")
+        console.log("hello3")
         part3data = await axios.post('https://portfolio-x-two.vercel.app/api/v1/createallstocks', { "part": part3 });
-
+        part3data = part3data.data.filteredLogoData;
     } catch (error) {
         console.log(error);
     }
 });
-nodeCron.schedule("0 45 */2 * * *", async () => {
+nodeCron.schedule("0 0 3,7,11,15,19,23 * * *", async () => {
     try {
-        console.log("hello")
-        part4data = await axios.post('https://portfolio-x-two.vercel.app/api/v1/createallstocks', { "part": part4 }).filteredLogoData;
-
+        console.log("hello4")
+        part4data = await axios.post('https://portfolio-x-two.vercel.app/api/v1/createallstocks', { "part": part4 });
+        part4data = part4data.data.filteredLogoData;
     } catch (error) {
         console.log(error);
     }
 });
 
-nodeCron.schedule("0 50 */2 * * *", async () => {
+nodeCron.schedule("0 50 3,7,11,15,19,23 * * *", async () => {
     try {
         console.log("hello")
-        await axios.post('https://portfolio-x-two.vercel.app/api/v1/mergeAllStocks', { part1data, part2data, part3data, part4data });
+        await axios.post('https://portfolio-x-two.vercel.app/api/v1/mergeAllStocks', { "part1data": part1data, "part2data": part2data, "part3data": part3data, "part4data": part4data });
 
     } catch (error) {
         console.log(error);

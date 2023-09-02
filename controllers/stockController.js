@@ -9,8 +9,8 @@ export const splitAllStocks = catchAsyncError(async (req, res, next) => {
         );
         const data = response.data.data;
 
-        const symbolsWithoutPeriod = data.filter(symbol => !symbol.symbol.includes("."));
-
+        const symbolsWithoutPeriod = data.filter(symbol => !symbol.symbol.includes(".")).slice(0, 1000);
+        console.log(symbolsWithoutPeriod.length);
         const totalSymbols = symbolsWithoutPeriod.length;
         const partSize = Math.ceil(totalSymbols / 4);
 
@@ -79,17 +79,25 @@ export const createAllStocks = catchAsyncError(async (req, res, next) => {
 });
 
 export const mergeAllStocks = catchAsyncError(async (req, res, next) => {
-    const { part1data, part2data, part3data, part4data } = req.body;
+    // const { part1data, part2data, part3data, part4data } = req.body;
+
+    const part1data = req.body.part1data;
+    const part2data = req.body.part2data;
+    const part3data = req.body.part3data;
+    const part4data = req.body.part4data;
+    console.log(part1data);
+
+    console.log(part1data.length, part2data.length, part3data.length, part4data.length);
     try {
         const result = await Stocks.deleteMany({});
         console.log(`Deleted ${result.deletedCount} documents.`);
     } catch (error) {
         console.error('Error deleting documents:', error);
     }
-    merge(part1data);
-    merge(part2data);
-    merge(part3data);
-    merge(part4data);
+    await merge(part1data);
+    await merge(part2data);
+    await merge(part3data);
+    await merge(part4data);
 
     res.status(201).json({
         success: true,
@@ -99,6 +107,7 @@ export const mergeAllStocks = catchAsyncError(async (req, res, next) => {
 });
 
 const merge = async (part) => {
+    console.log(part);
     part.forEach(async (data) => {
         try {
             const stock = await Stocks.create({
