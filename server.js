@@ -40,14 +40,14 @@ const getsymbols = async () => {
             } catch (error) {
                 // console.log(error);
             }
-        }, 5 * 60 * 1000); // 1 hour in milliseconds
+        }, 10000); // 1 hour in milliseconds
     }
 
     // Call the fetchDataAndMerge function initially
     fetchDataAndMerge();
 
     // Set a 2-hour interval to repeat the entire process
-    setInterval(fetchDataAndMerge, 15 * 60 * 1000); // 2 hours in milliseconds
+    setInterval(fetchDataAndMerge, 60000); // 2 hours in milliseconds
 
 
 
