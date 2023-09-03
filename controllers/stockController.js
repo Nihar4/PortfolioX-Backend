@@ -110,7 +110,7 @@ export const createAllStocks2 = catchAsyncError(async (req, res, next) => {
         const part2data = await Temp.find({});
         console.log(part2data[0].part2)
 
-        await axios.post('https://portfolio-x-two.vercel.app/api/v1/mergeAllStocks', { "part1data": part1data[0].part1, "part2data": part2data[0].part2 });
+        await axios.post('http://localhost:4000/api/v1/mergeAllStocks', { "part1data": part1data[0].part1, "part2data": part2data[0].part2 });
         res.status(201).json({
             success: true,
         });
