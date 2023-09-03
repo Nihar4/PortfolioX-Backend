@@ -55,25 +55,25 @@ connectDB();
 // getsymbols();
 
 
-nodeCron.schedule("0 18 */1 * * *", async () => {
-    try {
-        // console.log(part1);
-        await axios.get('http://localhost:4000/api/v1/createallstocks1');
+// nodeCron.schedule("0 18 */1 * * *", async () => {
+//     try {
+//         // console.log(part1);
+//         await axios.get('http://localhost:4000/api/v1/createallstocks1');
 
-    } catch (error) {
-        console.log(error);
-    }
-});
+//     } catch (error) {
+//         console.log(error);
+//     }
+// });
 
-nodeCron.schedule("0 48 */1 * * *", async () => {
-    try {
-        // console.log(part1);
-        await axios.get('http://localhost:4000/api/v1/createallstocks2');
+// nodeCron.schedule("0 48 */1 * * *", async () => {
+//     try {
+//         // console.log(part1);
+//         await axios.get('http://localhost:4000/api/v1/createallstocks2');
 
-    } catch (error) {
-        console.log(error);
-    }
-});
+//     } catch (error) {
+//         console.log(error);
+//     }
+// });
 
 
 
