@@ -192,7 +192,7 @@ export const createAllStocks4 = catchAsyncError(async (req, res, next) => {
         const symbolsWithoutPeriod = data.filter(symbol => !symbol.symbol.includes("."));
         console.log(symbolsWithoutPeriod.length);
         const totalSymbols = symbolsWithoutPeriod.length;
-        const partSize = Math.ceil(totalSymbols / 2);
+        const partSize = Math.ceil(totalSymbols / 4);
 
         // Divide the symbols into four parts
         const part1 = symbolsWithoutPeriod.slice(0, partSize).map((item) => item.symbol);

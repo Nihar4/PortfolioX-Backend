@@ -1,5 +1,5 @@
 import express from "express";
-import { createAllStocks, createAllStocks2, deleteAllStocks, getAllStocks, mergeAllStocks, topGainer, topLosers } from "../controllers/stockController.js"
+import { createAllStocks, createAllStocks2, createAllStocks3, createAllStocks4, deleteAllStocks, getAllStocks, mergeAllStocks, topGainer, topLosers } from "../controllers/stockController.js"
 
 const router = express.Router();
 
