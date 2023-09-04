@@ -14,11 +14,13 @@ export const createAllStocks = catchAsyncError(async (req, res, next) => {
         const symbolsWithoutPeriod = data.filter(symbol => !symbol.symbol.includes("."));
         console.log(symbolsWithoutPeriod.length);
         const totalSymbols = symbolsWithoutPeriod.length;
-        const partSize = Math.ceil(totalSymbols / 2);
+        const partSize = Math.ceil(totalSymbols / 4);
 
         // Divide the symbols into four parts
         const part1 = symbolsWithoutPeriod.slice(0, partSize).map((item) => item.symbol);
         const part2 = symbolsWithoutPeriod.slice(partSize, 2 * partSize).map((item) => item.symbol);
+        const part3 = symbolsWithoutPeriod.slice(2 * partSize, 3 * partSize).map((item) => item.symbol);
+        const part4 = symbolsWithoutPeriod.slice(3 * partSize, 4 * partSize).map((item) => item.symbol);
 
         // console.log(part);
         const logoData = await Promise.all(
@@ -70,11 +72,13 @@ export const createAllStocks2 = catchAsyncError(async (req, res, next) => {
         const symbolsWithoutPeriod = data.filter(symbol => !symbol.symbol.includes("."));
         console.log(symbolsWithoutPeriod.length);
         const totalSymbols = symbolsWithoutPeriod.length;
-        const partSize = Math.ceil(totalSymbols / 2);
+        const partSize = Math.ceil(totalSymbols / 4);
 
         // Divide the symbols into four parts
         const part1 = symbolsWithoutPeriod.slice(0, partSize).map((item) => item.symbol);
         const part2 = symbolsWithoutPeriod.slice(partSize, 2 * partSize).map((item) => item.symbol);
+        const part3 = symbolsWithoutPeriod.slice(2 * partSize, 3 * partSize).map((item) => item.symbol);
+        const part4 = symbolsWithoutPeriod.slice(3 * partSize, 4 * partSize).map((item) => item.symbol);
 
         // console.log(part);
         const logoData = await Promise.all(
@@ -91,17 +95,16 @@ export const createAllStocks2 = catchAsyncError(async (req, res, next) => {
         const filteredLogoData = filteredLogoData1.filter(
             (item) => item.regularMarketChangeRS !== null && item.CurrentPrice !== null && item.regularMarketChangePercent !== null && item.regularMarketPreviousClose !== null
         );
-        const part1data = await Temp.find({});
-        // console.log(part1data[0].part1)
+        const allpart = await Temp.find({});
         try {
             const result = await Temp.deleteMany({});
-            // console.log(`Deleted ${result.deletedCount} documents.`);
+            console.log(`Deleted ${result.deletedCount} documents.`);
         } catch (error) {
             console.error('Error deleting documents:', error);
         }
         try {
             const stocktemp = await Temp.create({
-                part1: part1data[0].part1,
+                part1: allpart[0].part1,
                 part2: filteredLogoData
             });
 
@@ -109,10 +112,133 @@ export const createAllStocks2 = catchAsyncError(async (req, res, next) => {
         } catch (error) {
             console.error("Error creating stocktemp:", error);
         }
-        const part2data = await Temp.find({});
+
+        res.status(201).json({
+            success: true,
+        });
+    } catch (error) {
+        console.log("error2 ", error);
+        return null;
+    }
+});
+export const createAllStocks3 = catchAsyncError(async (req, res, next) => {
+    try {
+        const response = await axios.get(
+            "https://api.twelvedata.com/stocks?mic_code=XNSE&source=docs"
+        );
+        const data = response.data.data;
+
+        const symbolsWithoutPeriod = data.filter(symbol => !symbol.symbol.includes("."));
+        console.log(symbolsWithoutPeriod.length);
+        const totalSymbols = symbolsWithoutPeriod.length;
+        const partSize = Math.ceil(totalSymbols / 4);
+
+        // Divide the symbols into four parts
+        const part1 = symbolsWithoutPeriod.slice(0, partSize).map((item) => item.symbol);
+        const part2 = symbolsWithoutPeriod.slice(partSize, 2 * partSize).map((item) => item.symbol);
+        const part3 = symbolsWithoutPeriod.slice(2 * partSize, 3 * partSize).map((item) => item.symbol);
+        const part4 = symbolsWithoutPeriod.slice(3 * partSize, 4 * partSize).map((item) => item.symbol);
+
+        // console.log(part);
+        const logoData = await Promise.all(
+            part3.map(async (symbol) => {
+                // console.log(symbol);
+                const s = symbol + ".NS";
+                const url = `https://query1.finance.yahoo.com/v7/finance/options/${s}?modules=financialData`;
+                const url1 = `https://query1.finance.yahoo.com/v8/finance/chart/${s}?region=US&lang=en-US&includePrePost=false&interval=1d&range=5d&corsDomain=finance.yahoo.com&.tsrc=financed`
+                return fetchStockDataWithRetries(url, url1);
+            })
+        );
+
+        const filteredLogoData1 = logoData.filter((item) => item !== null);
+        const filteredLogoData = filteredLogoData1.filter(
+            (item) => item.regularMarketChangeRS !== null && item.CurrentPrice !== null && item.regularMarketChangePercent !== null && item.regularMarketPreviousClose !== null
+        );
+        const allpart = await Temp.find({});
+        try {
+            const result = await Temp.deleteMany({});
+            console.log(`Deleted ${result.deletedCount} documents.`);
+        } catch (error) {
+            console.error('Error deleting documents:', error);
+        }
+        try {
+            const stocktemp = await Temp.create({
+                part1: allpart[0].part1,
+                part2: allpart[0].part2,
+                part3: filteredLogoData
+            });
+
+            // You can do something with the 'stock' instance here if needed
+        } catch (error) {
+            console.error("Error creating stocktemp:", error);
+        }
+
+        res.status(201).json({
+            success: true,
+        });
+    } catch (error) {
+        console.log("error2 ", error);
+        return null;
+    }
+});
+
+export const createAllStocks4 = catchAsyncError(async (req, res, next) => {
+    try {
+        const response = await axios.get(
+            "https://api.twelvedata.com/stocks?mic_code=XNSE&source=docs"
+        );
+        const data = response.data.data;
+
+        const symbolsWithoutPeriod = data.filter(symbol => !symbol.symbol.includes("."));
+        console.log(symbolsWithoutPeriod.length);
+        const totalSymbols = symbolsWithoutPeriod.length;
+        const partSize = Math.ceil(totalSymbols / 2);
+
+        // Divide the symbols into four parts
+        const part1 = symbolsWithoutPeriod.slice(0, partSize).map((item) => item.symbol);
+        const part2 = symbolsWithoutPeriod.slice(partSize, 2 * partSize).map((item) => item.symbol);
+        const part3 = symbolsWithoutPeriod.slice(2 * partSize, 3 * partSize).map((item) => item.symbol);
+        const part4 = symbolsWithoutPeriod.slice(3 * partSize, 4 * partSize).map((item) => item.symbol);
+
+
+        // console.log(part);
+        const logoData = await Promise.all(
+            part4.map(async (symbol) => {
+                // console.log(symbol);
+                const s = symbol + ".NS";
+                const url = `https://query1.finance.yahoo.com/v7/finance/options/${s}?modules=financialData`;
+                const url1 = `https://query1.finance.yahoo.com/v8/finance/chart/${s}?region=US&lang=en-US&includePrePost=false&interval=1d&range=5d&corsDomain=finance.yahoo.com&.tsrc=financed`
+                return fetchStockDataWithRetries(url, url1);
+            })
+        );
+
+        const filteredLogoData1 = logoData.filter((item) => item !== null);
+        const filteredLogoData = filteredLogoData1.filter(
+            (item) => item.regularMarketChangeRS !== null && item.CurrentPrice !== null && item.regularMarketChangePercent !== null && item.regularMarketPreviousClose !== null
+        );
+        const allpart = await Temp.find({});
+        try {
+            const result = await Temp.deleteMany({});
+            console.log(`Deleted ${result.deletedCount} documents.`);
+        } catch (error) {
+            console.error('Error deleting documents:', error);
+        }
+        try {
+            const stocktemp = await Temp.create({
+                part1: allpart[0].part1,
+                part2: allpart[0].part2,
+                part3: allpart[0].part3,
+                part4: filteredLogoData
+            });
+
+            // You can do something with the 'stock' instance here if needed
+        } catch (error) {
+            console.error("Error creating stocktemp:", error);
+        }
+        const alldata1 = await Temp.find({});
         // console.log(part2data[0].part2)
 
-        await axios.post('https://portfolio-x-two.vercel.app/api/v1/mergeAllStocks', { "part1data": part1data[0].part1, "part2data": part2data[0].part2 });
+        await axios.post('https://portfolio-x-two.vercel.app/api/v1/mergeAllStocks', { "part1data": alldata1[0].part1, "part2data": alldata1[0].part2, "part3data": alldata1[0].part3, "part4data": alldata1[0].part4 });
         res.status(201).json({
             success: true,
         });
@@ -123,10 +249,10 @@ export const createAllStocks2 = catchAsyncError(async (req, res, next) => {
 });
 
 export const mergeAllStocks = catchAsyncError(async (req, res, next) => {
-    // const { part1data, part2data, part3data, part4data } = req.body;
+    const { part1data, part2data, part3data, part4data } = req.body;
 
-    const part1data = req.body.part1data;
-    const part2data = req.body.part2data;
+    // const part1data = req.body.part1data;
+    // const part2data = req.body.part2data;
     // const part3data = req.body.part3data;
     // const part4data = req.body.part4data;
     // console.log(part1data);
@@ -140,8 +266,8 @@ export const mergeAllStocks = catchAsyncError(async (req, res, next) => {
     }
     await merge(part1data);
     await merge(part2data);
-    // await merge(part3data);
-    // await merge(part4data);
+    await merge(part3data);
+    await merge(part4data);
 
     res.status(201).json({
         success: true,

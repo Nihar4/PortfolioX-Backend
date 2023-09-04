@@ -7,6 +7,9 @@ const router = express.Router();
 // router.route("/splitallstocks").get(splitAllStocks);
 router.route("/createallstocks1").post(createAllStocks);
 router.route("/createallstocks2").post(createAllStocks2);
+router.route("/createallstocks3").post(createAllStocks3);
+router.route("/createallstocks4").post(createAllStocks4);
+
 router.route("/getallstocks").get(getAllStocks);
 router.route("/mergeAllStocks").post(mergeAllStocks);
 
