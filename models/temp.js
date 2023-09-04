@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const schema = new mongoose.Schema({
     part1: [{
-        name: String,
+        // name: String,
         symbol: String,
         CurrentPrice: Number,
         regularMarketChangeRS: Number,
@@ -10,7 +10,7 @@ const schema = new mongoose.Schema({
         regularMarketChangePercent: Number,
     }],
     part2: [{
-        name: String,
+        // name: String,
         symbol: String,
         CurrentPrice: Number,
         regularMarketChangeRS: Number,

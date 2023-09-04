@@ -3,10 +3,10 @@
 import mongoose from "mongoose";
 
 const schema = new mongoose.Schema({
-    name: {
-        type: String,
-        default: "",
-    },
+    // name: {
+    //     type: String,
+    //     default: "",
+    // },
     symbol: {
         type: String,
         default: "",

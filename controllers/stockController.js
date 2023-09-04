@@ -26,7 +26,8 @@ export const createAllStocks = catchAsyncError(async (req, res, next) => {
                 // console.log(symbol);
                 const s = symbol + ".NS";
                 const url = `https://query1.finance.yahoo.com/v7/finance/options/${s}?modules=financialData`;
-                return fetchStockDataWithRetries(url);
+                const url1 = `https://query1.finance.yahoo.com/v8/finance/chart/${s}?region=US&lang=en-US&includePrePost=false&interval=1d&range=5d&corsDomain=finance.yahoo.com&.tsrc=financed`
+                return fetchStockDataWithRetries(url, url1);
             })
         );
 
@@ -81,7 +82,8 @@ export const createAllStocks2 = catchAsyncError(async (req, res, next) => {
                 // console.log(symbol);
                 const s = symbol + ".NS";
                 const url = `https://query1.finance.yahoo.com/v7/finance/options/${s}?modules=financialData`;
-                return fetchStockDataWithRetries(url);
+                const url1 = `https://query1.finance.yahoo.com/v8/finance/chart/${s}?region=US&lang=en-US&includePrePost=false&interval=1d&range=5d&corsDomain=finance.yahoo.com&.tsrc=financed`
+                return fetchStockDataWithRetries(url, url1);
             })
         );
 
@@ -90,10 +92,10 @@ export const createAllStocks2 = catchAsyncError(async (req, res, next) => {
             (item) => item.regularMarketChangeRS !== null && item.CurrentPrice !== null && item.regularMarketChangePercent !== null && item.regularMarketPreviousClose !== null
         );
         const part1data = await Temp.find({});
-        console.log(part1data[0].part1)
+        // console.log(part1data[0].part1)
         try {
             const result = await Temp.deleteMany({});
-            console.log(`Deleted ${result.deletedCount} documents.`);
+            // console.log(`Deleted ${result.deletedCount} documents.`);
         } catch (error) {
             console.error('Error deleting documents:', error);
         }
@@ -108,9 +110,9 @@ export const createAllStocks2 = catchAsyncError(async (req, res, next) => {
             console.error("Error creating stocktemp:", error);
         }
         const part2data = await Temp.find({});
-        console.log(part2data[0].part2)
+        // console.log(part2data[0].part2)
 
-        // await axios.post('http://localhost:4000/api/v1/mergeAllStocks', { "part1data": part1data[0].part1, "part2data": part2data[0].part2 });
+        await axios.post('https://portfolio-x-two.vercel.app/api/v1/mergeAllStocks', { "part1data": part1data[0].part1, "part2data": part2data[0].part2 });
         res.status(201).json({
             success: true,
         });
@@ -149,11 +151,11 @@ export const mergeAllStocks = catchAsyncError(async (req, res, next) => {
 });
 
 const merge = async (part) => {
-    console.log(part);
+    // console.log(part);
     part.forEach(async (data) => {
         try {
             const stock = await Stocks.create({
-                name: data.name,
+                // name: data.name,
                 symbol: data.symbol,
                 CurrentPrice: data.CurrentPrice,
                 regularMarketChangeRS: data.regularMarketChangeRS,
@@ -169,28 +171,47 @@ const merge = async (part) => {
 }
 
 
-const fetchStockDataWithRetries = async (url) => {
+const fetchStockDataWithRetries = async (url, url1) => {
     try {
-        const response = await axios.get(url);
-        console.log(
-            response.data.optionChain.result[0].quote.regularMarketPrice,
-            response.data.optionChain.result[0].quote.regularMarketChangePercent,
-            response.data.optionChain.result[0].quote.regularMarketChange,
-            response.data.optionChain.result[0].quote.regularMarketPreviousClose,
-            response.data.optionChain.result[0].quote.symbol,
-            response.data.optionChain.result[0].quote.longName,
-        );
+        // const response1 = await axios.get(url);
+        const response = await axios.get(url1);
+        // console.log(
+        //     response.data.chart.result[0].meta.regularMarketPrice,
+        //     response.data.optionChain.result[0].quote.regularMarketChangePercent,
+        //     response.data.optionChain.result[0].quote.regularMarketChange,
+        //     response.data.chart.result[0].indicators.quote[0].close,
+        //     response.data.optionChain.result[0].quote.symbol,
+        //     response.data.optionChain.result[0].quote.longName,
+        // );
+        // console.log(response.data.chart);
+        const closeArray = response.data.chart.result[0].indicators.quote[0].close;
+        let secondToLastValue = 0, lastValue = 0;
+        if (closeArray.length >= 2) {
+            const lastTwoValues = closeArray.slice(-2);
+            // Now, lastTwoValues contains the last two values of the array
+            secondToLastValue = lastTwoValues[0];
+            lastValue = lastTwoValues[1];
 
-        const name = response.data.optionChain.result[0].quote.longName;
-        const symbol = response.data.optionChain.result[0].quote.symbol;
-        const CurrentPrice = response.data.optionChain.result[0].quote.regularMarketPrice;
-        const regularMarketChangeRS = response.data.optionChain.result[0].quote.regularMarketChange;
-        const regularMarketChangePercent = response.data.optionChain.result[0].quote.regularMarketChangePercent;
-        const regularMarketPreviousClose = response.data.optionChain.result[0].quote.regularMarketPreviousClose;
+            // console.log("Second to last value:", secondToLastValue);
+            // console.log("Last value:", lastValue);
+        } else {
+            // Handle the case where the array has fewer than 2 values
+            console.log("Array has fewer than 2 values");
+            return null;
+        }
+        // const name = response1.data.optionChain.result[0].quote.longName;
+        const symbol = response.data.chart.result[0].meta.symbol;
+        const CurrentPrice = response.data.chart.result[0].meta.regularMarketPrice;
+
+        const regularMarketChangeRS = lastValue - secondToLastValue;
+        const regularMarketChangePercent = secondToLastValue == null ? 0 : regularMarketChangeRS / secondToLastValue * 100;
+        const regularMarketPreviousClose = secondToLastValue;
+
+        console.log(symbol, CurrentPrice, regularMarketChangeRS, regularMarketChangePercent, regularMarketPreviousClose);
         // const data = response.data.chart.result[0].meta.regularMarketPrice;
 
         return {
-            name: name,
+            // name: name,
             symbol: symbol,
             CurrentPrice: CurrentPrice === undefined ? null : CurrentPrice,
             regularMarketChangeRS: regularMarketChangeRS === undefined ? null : regularMarketChangeRS,
@@ -199,16 +220,16 @@ const fetchStockDataWithRetries = async (url) => {
         };
     } catch (error) {
         if (error.response && error.response.status === 429) {
-            console.error("429");
+            console.log("429");
             // If a 429 error is encountered, wait for a while before retrying
             await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 5 seconds (adjust as needed)
             // Then retry the request
-            return fetchStockDataWithRetries(url);
+            return fetchStockDataWithRetries(url, url1);
 
             // return null;
         } else {
             // Handle other errors
-            console.error(`Error fetching data for ${url}:`, error);
+            console.log(`Error fetching data for ${url}:`, error);
             return null;
         }
         // return null;
@@ -230,7 +251,7 @@ export const deleteAllStocks = catchAsyncError(async (req, res, next) => {
         const result = await Stocks.deleteMany({});
         console.log(`Deleted ${result.deletedCount} documents.`);
     } catch (error) {
-        console.error('Error deleting documents:', error);
+        console.log('Error deleting documents:', error);
     }
     res.status(200).json({
         success: true,
