@@ -11,7 +11,7 @@ export const createAllStocks = catchAsyncError(async (req, res, next) => {
         );
         const data = response.data.data;
 
-        const symbolsWithoutPeriod = data.filter(symbol => !symbol.symbol.includes("."));
+        const symbolsWithoutPeriod = data.filter(symbol => !symbol.symbol.includes(".")).slice(0,4);
         console.log(symbolsWithoutPeriod.length);
         const totalSymbols = symbolsWithoutPeriod.length;
         const partSize = Math.ceil(totalSymbols / 2);
@@ -67,7 +67,7 @@ export const createAllStocks2 = catchAsyncError(async (req, res, next) => {
         );
         const data = response.data.data;
 
-        const symbolsWithoutPeriod = data.filter(symbol => !symbol.symbol.includes("."));
+        const symbolsWithoutPeriod = data.filter(symbol => !symbol.symbol.includes(".")).slice(0,4);
         console.log(symbolsWithoutPeriod.length);
         const totalSymbols = symbolsWithoutPeriod.length;
         const partSize = Math.ceil(totalSymbols / 2);
