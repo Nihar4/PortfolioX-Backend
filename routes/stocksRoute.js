@@ -1,5 +1,5 @@
 import express from "express";
-import { createAllStocksAll, deleteAllStocks, getAllStocks, topGainer, topLosers } from "../controllers/stockController.js";
+import { createAllStocksAll, getAllStocks, topGainer, topLosers } from "../controllers/stockController.js";
 // import { createAllStocks, createAllStocks2, createAllStocks3, createAllStocks4, createAllStocksAll, deleteAllStocks, getAllStocks, mergeAllStocks, topGainer, topLosers } from "../controllers/stockController.js"
 
 const router = express.Router();
@@ -16,7 +16,7 @@ router.route("/createallstocks").post(createAllStocksAll);
 router.route("/getallstocks").get(getAllStocks);
 // router.route("/mergeAllStocks").post(mergeAllStocks);
 
-router.route("/deleteallstocks").delete(deleteAllStocks);
+// router.route("/deleteallstocks").delete(deleteAllStocks);
 
 router.route("/topgainer").get(topGainer);
 

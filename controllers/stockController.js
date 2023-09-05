@@ -81,19 +81,21 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
             }
         });
 
-        const allpart = await Temp.find({});
-        try {
-            const result = await Temp.deleteMany({});
-            console.log(`Deleted ${result.deletedCount} documents.`);
-        } catch (error) {
-            console.error('Error deleting documents:', error);
-        }
+        const allpart = await Temp.findOne({});
+        // try {
+        //     const result = await Temp.deleteMany({});
+        //     console.log(`Deleted ${result.deletedCount} documents.`);
+        // } catch (error) {
+        //     console.error('Error deleting documents:', error);
+        // }
         switch (number) {
             case 1:
                 try {
-                    const stocktemp = await Temp.create({
-                        part1: filteredLogoData
-                    });
+                    // const stocktemp = await Temp.create({
+                    //     part1: filteredLogoData
+                    // });
+                    allpart.part1 = filteredLogoData;
+                    // await allpart.save();
 
                     // You can do something with the 'stock' instance here if needed
                 } catch (error) {
@@ -103,10 +105,12 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
                 break;
             case 2:
                 try {
-                    const stocktemp = await Temp.create({
-                        part1: allpart[0].part1,
-                        part2: filteredLogoData
-                    });
+                    // const stocktemp = await Temp.create({
+                    //     part1: allpart[0].part1,
+                    //     part2: filteredLogoData
+                    // });
+                    allpart.part2 = filteredLogoData;
+                    // await allpart.save();
 
                     // You can do something with the 'stock' instance here if needed
                 } catch (error) {
@@ -115,11 +119,13 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
                 break;
             case 3:
                 try {
-                    const stocktemp = await Temp.create({
-                        part1: allpart[0].part1,
-                        part2: allpart[0].part2,
-                        part3: filteredLogoData
-                    });
+                    // const stocktemp = await Temp.create({
+                    //     part1: allpart[0].part1,
+                    //     part2: allpart[0].part2,
+                    //     part3: filteredLogoData
+                    // });
+                    allpart.part3 = filteredLogoData;
+                    // await allpart.save();
 
                     // You can do something with the 'stock' instance here if needed
                 } catch (error) {
@@ -128,21 +134,24 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
                 break;
             case 4:
                 try {
-                    const stocktemp = await Temp.create({
-                        part1: allpart[0].part1,
-                        part2: allpart[0].part2,
-                        part3: allpart[0].part3,
-                        part4: filteredLogoData
-                    });
+                    // const stocktemp = await Temp.create({
+                    //     part1: allpart[0].part1,
+                    //     part2: allpart[0].part2,
+                    //     part3: allpart[0].part3,
+                    //     part4: filteredLogoData
+                    // });
+                    allpart.part4 = filteredLogoData;
+                    // await allpart.save();
 
                     // You can do something with the 'stock' instance here if needed
                 } catch (error) {
                     console.error("Error creating stocktemp:", error);
                 }
+
                 const alldata1 = await Temp.find({});
                 // console.log(part2data[0].part2)
 
-                mergeAllStocks(alldata1[0].part1, alldata1[0].part2, alldata1[0].part3, alldata1[0].part4);
+                // await mergeAllStocks(alldata1[0].part1, alldata1[0].part2, alldata1[0].part3, alldata1[0].part4);
                 break;
 
             default:
@@ -151,6 +160,7 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
                 });
                 break;
         }
+        await allpart.save();
 
         res.status(201).json({
             success: true,
@@ -432,47 +442,47 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
 //     }
 // });
 
-const mergeAllStocks = async (part1data, part2data, part3data, part4data) => {
-    // const { part1data, part2data, part3data, part4data } = req.body;
+// const mergeAllStocks = async (part1data, part2data, part3data, part4data) => {
+//     // const { part1data, part2data, part3data, part4data } = req.body;
 
-    // const part1data = req.body.part1data;
-    // const part2data = req.body.part2data;
-    // const part3data = req.body.part3data;
-    // const part4data = req.body.part4data;
-    // console.log(part1data);
+//     // const part1data = req.body.part1data;
+//     // const part2data = req.body.part2data;
+//     // const part3data = req.body.part3data;
+//     // const part4data = req.body.part4data;
+//     // console.log(part1data);
 
-    console.log(part1data.length, part2data.length, part3data.length, part4data.length);
-    try {
-        const result = await Stocks.deleteMany({});
-        console.log(`Deleted ${result.deletedCount} documents.`);
-    } catch (error) {
-        console.error('Error deleting documents:', error);
-    }
-    await merge(part1data);
-    await merge(part2data);
-    await merge(part3data);
-    await merge(part4data);
-};
+//     console.log(part1data.length, part2data.length, part3data.length, part4data.length);
+//     try {
+//         const result = await Stocks.deleteMany({});
+//         console.log(`Deleted ${result.deletedCount} documents.`);
+//     } catch (error) {
+//         console.error('Error deleting documents:', error);
+//     }
+//     await merge(part1data);
+//     await merge(part2data);
+//     await merge(part3data);
+//     await merge(part4data);
+// };
 
-const merge = async (part) => {
-    // console.log(part);
-    part.forEach(async (data) => {
-        try {
-            const stock = await Stocks.create({
-                // name: data.name,
-                symbol: data.symbol,
-                CurrentPrice: data.CurrentPrice,
-                regularMarketChangeRS: data.regularMarketChangeRS,
-                regularMarketPreviousClose: data.regularMarketPreviousClose,
-                regularMarketChangePercent: data.regularMarketChangePercent
-            });
+// const merge = async (part) => {
+//     // console.log(part);
+//     part.forEach(async (data) => {
+//         try {
+//             const stock = await Stocks.create({
+//                 // name: data.name,
+//                 symbol: data.symbol,
+//                 CurrentPrice: data.CurrentPrice,
+//                 regularMarketChangeRS: data.regularMarketChangeRS,
+//                 regularMarketPreviousClose: data.regularMarketPreviousClose,
+//                 regularMarketChangePercent: data.regularMarketChangePercent
+//             });
 
-            // You can do something with the 'stock' instance here if needed
-        } catch (error) {
-            console.error("Error creating stock:", error);
-        }
-    });
-}
+//             // You can do something with the 'stock' instance here if needed
+//         } catch (error) {
+//             console.error("Error creating stock:", error);
+//         }
+//     });
+// }
 
 
 const fetchStockDataWithRetries = async (url, url1) => {
@@ -544,34 +554,52 @@ const fetchStockDataWithRetries = async (url, url1) => {
 }
 
 export const getAllStocks = catchAsyncError(async (req, res, next) => {
-    const stocks = await Stocks.find({
-    });
+    const stocks = await Temp.find({});
+
+    // Extract the four arrays and merge them into a single array
+    const allStocks = [
+        ...stocks[0].part1,
+        ...stocks[0].part2,
+        ...stocks[0].part3,
+        ...stocks[0].part4,
+    ];
     res.status(200).json({
         success: true,
-        stocks,
+        allStocks,
     });
 });
 
-export const deleteAllStocks = catchAsyncError(async (req, res, next) => {
-    try {
-        const result = await Stocks.deleteMany({});
-        console.log(`Deleted ${result.deletedCount} documents.`);
-    } catch (error) {
-        console.log('Error deleting documents:', error);
-    }
-    res.status(200).json({
-        success: true,
-        message: "Deleted Succesfully"
-    });
-});
+// export const deleteAllStocks = catchAsyncError(async (req, res, next) => {
+//     try {
+//         const result = await Stocks.deleteMany({});
+//         console.log(`Deleted ${result.deletedCount} documents.`);
+//     } catch (error) {
+//         console.log('Error deleting documents:', error);
+//     }
+//     res.status(200).json({
+//         success: true,
+//         message: "Deleted Succesfully"
+//     });
+// });
 
 export const topGainer = catchAsyncError(async (req, res, next) => {
-    const stocks = await Stocks.find({
-    });
-    stocks.sort((a, b) => b.regularMarketChangePercent - a.regularMarketChangePercent);
+    const stocks = await Temp.find({});
+
+    // Extract the four arrays and merge them into a single array
+    const allStocks = [
+        ...stocks[0].part1,
+        ...stocks[0].part2,
+        ...stocks[0].part3,
+        ...stocks[0].part4,
+    ];
+    console.log(allStocks.length);
+
+    // Sort allStocks by regularMarketChangePercent in descending order
+    allStocks.sort((a, b) => b.regularMarketChangePercent - a.regularMarketChangePercent);
 
     // Get the top 5 stocks
-    const top5Stocks = stocks.slice(0, 5);
+    const top5Stocks = allStocks.slice(0, 5);
+
     res.status(200).json({
         success: true,
         top5Stocks,
@@ -579,14 +607,23 @@ export const topGainer = catchAsyncError(async (req, res, next) => {
 });
 
 
+
 export const topLosers = catchAsyncError(async (req, res, next) => {
-    const stocks = await Stocks.find({});
+    const stocks = await Temp.find({});
 
-    // Sort the stocks by regularMarketChangePercent in ascending order
-    stocks.sort((a, b) => a.regularMarketChangePercent - b.regularMarketChangePercent);
+    // Extract the four arrays and merge them into a single array
+    const allStocks = [
+        ...stocks[0].part1,
+        ...stocks[0].part2,
+        ...stocks[0].part3,
+        ...stocks[0].part4,
+    ];
 
-    // Get the top 5 stocks (these will be the top losers)
-    const top5Stocks = stocks.slice(0, 5);
+    // Sort allStocks by regularMarketChangePercent in descending order
+    allStocks.sort((a, b) => a.regularMarketChangePercent - b.regularMarketChangePercent);
+
+    // Get the top 5 stocks
+    const top5Stocks = allStocks.slice(0, 5);
 
     res.status(200).json({
         success: true,
