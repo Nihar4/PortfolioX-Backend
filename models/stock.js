@@ -1,35 +1,42 @@
-// symbol , name , regularMarketChange RS, regularMarketPreviousClose , regularMarketChange Percentage
-
 import mongoose from "mongoose";
 
 const schema = new mongoose.Schema({
-    // name: {
-    //     type: String,
-    //     default: "",
-    // },
-    symbol: {
-        type: String,
-        default: "",
+    createdAt: {
+        type: Date,
+        default: Date.now,
     },
-    CurrentPrice: {
-        type: Number,
-        default: 0,
-    },
-
-    regularMarketChangeRS: {
-        type: Number,
-        default: 0,
-    },
-
-    regularMarketPreviousClose: {
-        type: Number,
-        default: 0,
-    },
-
-    regularMarketChangePercent: {
-        type: Number,
-        default: 0,
-    },
+    part1: [{
+        // name: String,
+        symbol: String,
+        CurrentPrice: Number,
+        regularMarketChangeRS: Number,
+        regularMarketPreviousClose: Number,
+        regularMarketChangePercent: Number,
+    }],
+    part2: [{
+        // name: String,
+        symbol: String,
+        CurrentPrice: Number,
+        regularMarketChangeRS: Number,
+        regularMarketPreviousClose: Number,
+        regularMarketChangePercent: Number,
+    }],
+    part3: [{
+        // name: String,
+        symbol: String,
+        CurrentPrice: Number,
+        regularMarketChangeRS: Number,
+        regularMarketPreviousClose: Number,
+        regularMarketChangePercent: Number,
+    }],
+    part4: [{
+        // name: String,
+        symbol: String,
+        CurrentPrice: Number,
+        regularMarketChangeRS: Number,
+        regularMarketPreviousClose: Number,
+        regularMarketChangePercent: Number,
+    }],
 });
 
-export const Stocks = mongoose.model("Stocks", schema);
+export const Stock = mongoose.model("Stock", schema);

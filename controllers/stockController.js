@@ -1,18 +1,21 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
-import { Stocks } from "../models/stock.js";
+// import { Stocks } from "../models/stockTemp.js";
 import axios from "axios";
-import { Temp } from "../models/temp.js";
+import { Stock } from "../models/stock.js";
 
 
 export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
     try {
+        // const stocktemp = await Stock.create({
+
+        // });
         const { number } = req.body;
         const response = await axios.get(
             "https://api.twelvedata.com/stocks?mic_code=XNSE&source=docs"
         );
         const data = response.data.data;
 
-        const symbolsWithoutPeriod = data.filter(symbol => !symbol.symbol.includes("."));
+        const symbolsWithoutPeriod = data.filter(symbol => !symbol.symbol.includes(".")).slice(0, 4);
         // console.log(symbolsWithoutPeriod.length);
         const totalSymbols = symbolsWithoutPeriod.length;
         const partSize = Math.ceil(totalSymbols / 4);
@@ -81,7 +84,7 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
             }
         });
 
-        const allpart = await Temp.findOne({});
+        const allpart = await Stock.findOne({});
         // try {
         //     const result = await Temp.deleteMany({});
         //     console.log(`Deleted ${result.deletedCount} documents.`);
@@ -148,7 +151,7 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
                     console.error("Error creating stocktemp:", error);
                 }
 
-                const alldata1 = await Temp.find({});
+                const alldata1 = await Stock.find({});
                 // console.log(part2data[0].part2)
 
                 // await mergeAllStocks(alldata1[0].part1, alldata1[0].part2, alldata1[0].part3, alldata1[0].part4);
@@ -160,6 +163,7 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
                 });
                 break;
         }
+        allpart.createdAt = new Date(Date.now())
         await allpart.save();
 
         res.status(201).json({
