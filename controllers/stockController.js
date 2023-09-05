@@ -142,7 +142,7 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
                 const alldata1 = await Temp.find({});
                 // console.log(part2data[0].part2)
 
-                await axios.post('https://portfolio-x-two.vercel.app/api/v1/mergeAllStocks', { "part1data": alldata1[0].part1, "part2data": alldata1[0].part2, "part3data": alldata1[0].part3, "part4data": alldata1[0].part4 });
+                mergeAllStocks(alldata1[0].part1, alldata1[0].part2, alldata1[0].part3, alldata1[0].part4);
                 break;
 
             default:
@@ -432,8 +432,8 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
 //     }
 // });
 
-export const mergeAllStocks = catchAsyncError(async (req, res, next) => {
-    const { part1data, part2data, part3data, part4data } = req.body;
+const mergeAllStocks = async (part1data, part2data, part3data, part4data) => {
+    // const { part1data, part2data, part3data, part4data } = req.body;
 
     // const part1data = req.body.part1data;
     // const part2data = req.body.part2data;
@@ -452,13 +452,7 @@ export const mergeAllStocks = catchAsyncError(async (req, res, next) => {
     await merge(part2data);
     await merge(part3data);
     await merge(part4data);
-
-    res.status(201).json({
-        success: true,
-        message: "stocks Created Successfully.",
-    });
-
-});
+};
 
 const merge = async (part) => {
     // console.log(part);
