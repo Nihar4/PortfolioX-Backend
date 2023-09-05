@@ -558,7 +558,7 @@ const fetchStockDataWithRetries = async (url, url1) => {
 }
 
 export const getAllStocks = catchAsyncError(async (req, res, next) => {
-    const stocks = await Temp.find({});
+    const stocks = await Stock.find({});
 
     // Extract the four arrays and merge them into a single array
     const allStocks = [
@@ -587,7 +587,7 @@ export const getAllStocks = catchAsyncError(async (req, res, next) => {
 // });
 
 export const topGainer = catchAsyncError(async (req, res, next) => {
-    const stocks = await Temp.find({});
+    const stocks = await Stock.find({});
 
     // Extract the four arrays and merge them into a single array
     const allStocks = [
@@ -613,7 +613,7 @@ export const topGainer = catchAsyncError(async (req, res, next) => {
 
 
 export const topLosers = catchAsyncError(async (req, res, next) => {
-    const stocks = await Temp.find({});
+    const stocks = await Stock.find({});
 
     // Extract the four arrays and merge them into a single array
     const allStocks = [
