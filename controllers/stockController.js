@@ -530,7 +530,30 @@ export const topGainer = catchAsyncError(async (req, res, next) => {
     allStocks.sort((a, b) => b.regularMarketChangePercent - a.regularMarketChangePercent);
 
     // Get the top 5 stocks
-    const topstocks = allStocks.slice(0, 5);
+    let cnt = 0;
+    let idx = 0;
+    let topstocks = [];
+    while (cnt < 5) {
+        const s = allStocks[idx].symbol;
+        const url = `https://query1.finance.yahoo.com/v7/finance/options/${s}?modules=financialData`;
+        const response1 = await axios.get(url);
+        try {
+            let name = response1.data.optionChain.result[0].quote.longName;
+            let temp = allStocks[idx];
+            // console.log(name)
+            temp.name = name;
+            // console.log(temp)
+            topstocks.push(temp);
+            // topstocks.back().name = name;
+            // allStocks[idx].name = 
+            // allStocks[idx]
+            cnt = cnt + 1;
+        } catch (error) {
+            console.log("name not found");
+        }
+        idx = idx + 1;
+
+    }
 
     res.status(200).json({
         success: true,
@@ -553,7 +576,31 @@ export const topLosers = catchAsyncError(async (req, res, next) => {
     allStocks.sort((a, b) => a.regularMarketChangePercent - b.regularMarketChangePercent);
 
     // Get the top 5 stocks
-    const topstocks = allStocks.slice(0, 5);
+    let cnt = 0;
+    let idx = 0;
+    let topstocks = [];
+    while (cnt < 5) {
+        const s = allStocks[idx].symbol;
+        const url = `https://query1.finance.yahoo.com/v7/finance/options/${s}?modules=financialData`;
+        const response1 = await axios.get(url);
+        try {
+            let name = response1.data.optionChain.result[0].quote.longName;
+            let temp = allStocks[idx];
+            // console.log(name)
+            temp.name = name;
+            // console.log(temp)
+            topstocks.push(temp);
+            // topstocks.back().name = name;
+            // allStocks[idx].name = 
+            // allStocks[idx]
+            cnt = cnt + 1;
+        } catch (error) {
+            console.log("name not found");
+        }
+        idx = idx + 1;
+
+    }
+
 
     res.status(200).json({
         success: true,
