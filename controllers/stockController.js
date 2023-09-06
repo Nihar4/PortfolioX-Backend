@@ -24,10 +24,10 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
 
         const symbolsWithoutPeriod = alldatasymbol.filter(symbol => !symbol.symbol.includes("."));
         const totalSymbols = symbolsWithoutPeriod.length;
-        const partSize = Math.ceil(totalSymbols / 5);
+        const partSize = Math.ceil(totalSymbols / 6);
 
         const parts = [];
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 6; i++) {
             const part = symbolsWithoutPeriod
                 .slice(i * partSize, (i + 1) * partSize)
                 .map((item) => (item.exchange === 'NSE' ? item.symbol + '.NS' : item.exchange === 'BSE' ? item.symbol + '.BO' : item.symbol));
@@ -35,7 +35,7 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
             parts.push(part);
         }
 
-        if (number < 1 || number > 5) {
+        if (number < 1 || number > 6) {
             return res.status(404).json({
                 error: true,
             });
@@ -79,6 +79,9 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
                 break;
             case 5:
                 allpart.part5 = filteredLogoData;
+                break;
+            case 6:
+                allpart.part6 = filteredLogoData;
                 break;
             default:
                 return res.status(404).json({
@@ -518,7 +521,9 @@ export const topGainer = catchAsyncError(async (req, res, next) => {
         ...stocks[0].part2,
         ...stocks[0].part3,
         ...stocks[0].part4,
-        ...stocks[0].part5, // Include part5
+        ...stocks[0].part5,
+        ...stocks[0].part6, // Include part5
+        // Include part5
     ];
 
     // Sort allStocks by regularMarketChangePercent in descending order
@@ -540,7 +545,8 @@ export const topLosers = catchAsyncError(async (req, res, next) => {
         ...stocks[0].part2,
         ...stocks[0].part3,
         ...stocks[0].part4,
-        ...stocks[0].part5, // Include part5
+        ...stocks[0].part5,
+        ...stocks[0].part6, // Include part5
     ];
 
     // Sort allStocks by regularMarketChangePercent in ascending order for losers
