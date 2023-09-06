@@ -6,202 +6,89 @@ import { Stock } from "../models/stock.js";
 
 export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
     try {
-        // const stocktemp = await Stock.create({
-
-        // });
         const { number } = req.body;
-        // let alldatasymbol=[]
 
-        const response = await axios.get(
+        const responseNSE = await axios.get(
             "https://api.twelvedata.com/stocks?mic_code=XNSE&source=docs"
         );
-        const data = response.data.data;
+        const dataNSE = responseNSE.data.data;
 
-        const response1 = await axios.get(
+        const responseBSE = await axios.get(
             "https://api.twelvedata.com/stocks?mic_code=XBOM&source=docs"
         );
-        const data1 = response1.data.data;
+        const dataBSE = responseBSE.data.data;
 
-
-        // Combine the data and data1 arrays
-        const alldatasymbol = data.concat(
-            data1.filter((item1) => !data.some((item) => item.symbol === item1.symbol))
+        const alldatasymbol = dataNSE.concat(
+            dataBSE.filter((itemBSE) => !dataNSE.some((itemNSE) => itemNSE.symbol === itemBSE.symbol))
         );
 
-        const symbolsWithoutPeriod = alldatasymbol.filter(symbol => !symbol.symbol.includes("."));
-        console.log(symbolsWithoutPeriod.length);
+        const symbolsWithoutPeriod = alldatasymbol.filter(symbol => !symbol.symbol.includes(".")).slice(0, 5);
         const totalSymbols = symbolsWithoutPeriod.length;
-        const partSize = Math.ceil(totalSymbols / 4);
+        const partSize = Math.ceil(totalSymbols / 5);
 
-        // Divide the symbols into four parts
-        const part1 = symbolsWithoutPeriod
-            .slice(0, partSize)
-            .map((item) => (item.exchange === 'NSE' ? item.symbol + '.NS' : item.exchange === 'BSE' ? item.symbol + '.BO' : item.symbol));
+        const parts = [];
+        for (let i = 0; i < 5; i++) {
+            const part = symbolsWithoutPeriod
+                .slice(i * partSize, (i + 1) * partSize)
+                .map((item) => (item.exchange === 'NSE' ? item.symbol + '.NS' : item.exchange === 'BSE' ? item.symbol + '.BO' : item.symbol));
 
-        const part2 = symbolsWithoutPeriod
-            .slice(partSize, 2 * partSize)
-            .map((item) => (item.exchange === 'NSE' ? item.symbol + '.NS' : item.exchange === 'BSE' ? item.symbol + '.BO' : item.symbol));
-
-        const part3 = symbolsWithoutPeriod
-            .slice(2 * partSize, 3 * partSize)
-            .map((item) => (item.exchange === 'NSE' ? item.symbol + '.NS' : item.exchange === 'BSE' ? item.symbol + '.BO' : item.symbol));
-
-        const part4 = symbolsWithoutPeriod
-            .slice(3 * partSize, 4 * partSize)
-            .map((item) => (item.exchange === 'NSE' ? item.symbol + '.NS' : item.exchange === 'BSE' ? item.symbol + '.BO' : item.symbol));
-
-        // const part4 = symbolsWithoutPeriod.slice(1600, 1610).map((item) => item.symbol);
-
-
-        // console.log(part);
-        let part = [];
-        switch (number) {
-            case 1:
-                part = part1;
-                break;
-            case 2:
-                part = part2;
-                break;
-            case 3:
-                part = part3;
-                break;
-            case 4:
-                part = part4;
-                break;
-
-            default:
-                res.status(404).json({
-                    error: true,
-                });
-                break;
+            parts.push(part);
         }
+
+        if (number < 1 || number > 5) {
+            return res.status(404).json({
+                error: true,
+            });
+        }
+
+        const partNumber = number - 1; // Adjust for 0-based array index
+        const selectedPart = parts[partNumber];
+
         const logoData = await Promise.all(
-            part.map(async (symbol) => {
-                // console.log(symbol);
-                // const s = symbol + ".NS";
-                // if (s !== "JTLINFRA.NS" && "KPIGLOBAL.NS") {
-                // console.log(symbol);
+            selectedPart.map(async (symbol) => {
                 const url = `https://query1.finance.yahoo.com/v7/finance/options/${symbol}?modules=financialData`;
                 const url1 = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?region=US&lang=en-US&includePrePost=false&interval=1d&range=5d&corsDomain=finance.yahoo.com&.tsrc=financed`
                 return fetchStockDataWithRetries(url, url1);
-                // return null;
-                // }
             })
         );
 
-        const filteredLogoData1 = logoData.filter((item) => item !== null);
-        const filteredLogoData = filteredLogoData1.filter((item) => {
-            try {
-                if (
-                    item.regularMarketChangeRS !== null &&
-                    item.CurrentPrice !== null &&
-                    item.regularMarketChangePercent !== null &&
-                    item.regularMarketPreviousClose !== null
-                ) {
-                    return true;
-                } else {
-                    // Log the item that caused the error
-                    // console.error('Invalid item:', item);
-                    return false;
-                }
-            } catch (error) {
-                // Log the error and the item that caused it
-                console.error('Error processing item:', item, error);
-                return false;
-            }
-        });
+        // Filter and process logoData as needed
 
         const allpart = await Stock.findOne({});
-        // try {
-        //     const result = await Temp.deleteMany({});
-        //     console.log(`Deleted ${result.deletedCount} documents.`);
-        // } catch (error) {
-        //     console.error('Error deleting documents:', error);
-        // }
+
         switch (number) {
             case 1:
-                try {
-                    // const stocktemp = await Temp.create({
-                    //     part1: filteredLogoData
-                    // });
-                    allpart.part1 = filteredLogoData;
-                    // await allpart.save();
-
-                    // You can do something with the 'stock' instance here if needed
-                } catch (error) {
-                    console.error("Error creating stocktemp:", error);
-                }
-
+                allpart.part1 = logoData;
                 break;
             case 2:
-                try {
-                    // const stocktemp = await Temp.create({
-                    //     part1: allpart[0].part1,
-                    //     part2: filteredLogoData
-                    // });
-                    allpart.part2 = filteredLogoData;
-                    // await allpart.save();
-
-                    // You can do something with the 'stock' instance here if needed
-                } catch (error) {
-                    console.error("Error creating stocktemp:", error);
-                }
+                allpart.part2 = logoData;
                 break;
             case 3:
-                try {
-                    // const stocktemp = await Temp.create({
-                    //     part1: allpart[0].part1,
-                    //     part2: allpart[0].part2,
-                    //     part3: filteredLogoData
-                    // });
-                    allpart.part3 = filteredLogoData;
-                    // await allpart.save();
-
-                    // You can do something with the 'stock' instance here if needed
-                } catch (error) {
-                    console.error("Error creating stocktemp:", error);
-                }
+                allpart.part3 = logoData;
                 break;
             case 4:
-                try {
-                    // const stocktemp = await Temp.create({
-                    //     part1: allpart[0].part1,
-                    //     part2: allpart[0].part2,
-                    //     part3: allpart[0].part3,
-                    //     part4: filteredLogoData
-                    // });
-                    allpart.part4 = filteredLogoData;
-                    // await allpart.save();
-
-                    // You can do something with the 'stock' instance here if needed
-                } catch (error) {
-                    console.error("Error creating stocktemp:", error);
-                }
-
-                const alldata1 = await Stock.find({});
-                // console.log(part2data[0].part2)
-
-                // await mergeAllStocks(alldata1[0].part1, alldata1[0].part2, alldata1[0].part3, alldata1[0].part4);
+                allpart.part4 = logoData;
                 break;
-
+            case 5:
+                allpart.part5 = logoData;
+                break;
             default:
-                res.status(404).json({
+                return res.status(404).json({
                     error: true,
                 });
-                break;
         }
-        allpart.createdAt = new Date(Date.now())
+
+        allpart.createdAt = new Date(Date.now());
         await allpart.save();
 
         res.status(201).json({
             success: true,
         });
     } catch (error) {
-        console.log("error2 ");
+        console.log("error2 ", error);
         res.status(400).json({
             error: true,
         });
-        return null;
     }
 });
 
@@ -618,47 +505,19 @@ export const getAllStocks = catchAsyncError(async (req, res, next) => {
 
 export const topGainer = catchAsyncError(async (req, res, next) => {
     const stocks = await Stock.find({});
-
-    // Extract the four arrays and merge them into a single array
     const allStocks = [
         ...stocks[0].part1,
         ...stocks[0].part2,
         ...stocks[0].part3,
         ...stocks[0].part4,
+        ...stocks[0].part5, // Include part5
     ];
-    console.log(allStocks.length);
 
     // Sort allStocks by regularMarketChangePercent in descending order
     allStocks.sort((a, b) => b.regularMarketChangePercent - a.regularMarketChangePercent);
 
     // Get the top 5 stocks
-    // const top5Stocks = allStocks.slice(0, 5);
-    let cnt = 0;
-    let idx = 0;
-
-    let topstocks = [];
-    while (cnt < 5) {
-        const s = allStocks[idx].symbol;
-        const url = `https://query1.finance.yahoo.com/v7/finance/options/${s}?modules=financialData`;
-        const response1 = await axios.get(url);
-        try {
-            let name = response1.data.optionChain.result[0].quote.longName;
-            let temp = allStocks[idx];
-            // console.log(name)
-            temp.name = name;
-            // console.log(temp)
-            topstocks.push(temp);
-            // topstocks.back().name = name;
-            // allStocks[idx].name = 
-            // allStocks[idx]
-            cnt = cnt + 1;
-        } catch (error) {
-            console.log("name not found");
-        }
-        idx = idx + 1;
-
-    }
-
+    const topstocks = allStocks.slice(0, 5);
 
     res.status(200).json({
         success: true,
@@ -666,51 +525,21 @@ export const topGainer = catchAsyncError(async (req, res, next) => {
     });
 });
 
-
-
 export const topLosers = catchAsyncError(async (req, res, next) => {
     const stocks = await Stock.find({});
-
-    // Extract the four arrays and merge them into a single array
     const allStocks = [
         ...stocks[0].part1,
         ...stocks[0].part2,
         ...stocks[0].part3,
         ...stocks[0].part4,
+        ...stocks[0].part5, // Include part5
     ];
-    console.log(allStocks.length);
 
-    // Sort allStocks by regularMarketChangePercent in descending order
+    // Sort allStocks by regularMarketChangePercent in ascending order for losers
     allStocks.sort((a, b) => a.regularMarketChangePercent - b.regularMarketChangePercent);
 
     // Get the top 5 stocks
-    // const top5Stocks = allStocks.slice(0, 5);
-    let cnt = 0;
-    let idx = 0;
-
-    let topstocks = [];
-    while (cnt < 5) {
-        const s = allStocks[idx].symbol;
-        const url = `https://query1.finance.yahoo.com/v7/finance/options/${s}?modules=financialData`;
-        const response1 = await axios.get(url);
-        try {
-            let name = response1.data.optionChain.result[0].quote.longName;
-            let temp = allStocks[idx];
-            // console.log(name)
-            temp.name = name;
-            // console.log(temp)
-            topstocks.push(temp);
-            // topstocks.back().name = name;
-            // allStocks[idx].name = 
-            // allStocks[idx]
-            cnt = cnt + 1;
-        } catch (error) {
-            console.log("name not found");
-        }
-        idx = idx + 1;
-
-    }
-
+    const topstocks = allStocks.slice(0, 5);
 
     res.status(200).json({
         success: true,
