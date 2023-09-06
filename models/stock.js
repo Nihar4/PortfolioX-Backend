@@ -53,6 +53,14 @@ const schema = new mongoose.Schema({
         regularMarketPreviousClose: Number,
         regularMarketChangePercent: Number,
     }],
+    popular: [{
+        name: String,
+        symbol: String,
+        CurrentPrice: Number,
+        regularMarketChangeRS: Number,
+        regularMarketPreviousClose: Number,
+        regularMarketChangePercent: Number,
+    }],
 });
 
 export const Stock = mongoose.model("Stock", schema);

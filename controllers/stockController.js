@@ -103,6 +103,32 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
     }
 });
 
+export const createpopularstocks = catchAsyncError(async (req, res, next) => {
+    const selectedPart = ["TCS.NS", "BHARTIARTL.NS", "TATAMOTORS.NS", "ITC.NS", "ICICIBANK.NS"]
+    const logoData = await Promise.all(
+        selectedPart.map(async (symbol) => {
+            const url = `https://query1.finance.yahoo.com/v7/finance/options/${symbol}?modules=financialData`;
+            const url1 = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?region=US&lang=en-US&includePrePost=false&interval=1d&range=5d&corsDomain=finance.yahoo.com&.tsrc=financed`
+            return fetchStockDataWithRetries(url, url1);
+        })
+    );
+    const filteredLogoData = logoData.filter((item) => (
+        item !== null &&
+        item.regularMarketChangeRS !== null &&
+        item.CurrentPrice !== null &&
+        item.regularMarketChangePercent !== null &&
+        item.regularMarketPreviousClose !== null
+    ));
+    const allpart = await Stock.findOne({});
+    allpart.popular = filteredLogoData;
+    allpart.save();
+
+    res.status(201).json({
+        success: true,
+    });
+})
+
+
 // export const createAllStocks = catchAsyncError(async (req, res, next) => {
 //     try {
 //         const response = await axios.get(
@@ -574,6 +600,45 @@ export const topLosers = catchAsyncError(async (req, res, next) => {
 
     // Sort allStocks by regularMarketChangePercent in ascending order for losers
     allStocks.sort((a, b) => a.regularMarketChangePercent - b.regularMarketChangePercent);
+
+    // Get the top 5 stocks
+    let cnt = 0;
+    let idx = 0;
+    let topstocks = [];
+    while (cnt < 5) {
+        const s = allStocks[idx].symbol;
+        const url = `https://query1.finance.yahoo.com/v7/finance/options/${s}?modules=financialData`;
+        const response1 = await axios.get(url);
+        try {
+            let name = response1.data.optionChain.result[0].quote.longName;
+            let temp = allStocks[idx];
+            // console.log(name)
+            temp.name = name;
+            // console.log(temp)
+            topstocks.push(temp);
+            // topstocks.back().name = name;
+            // allStocks[idx].name = 
+            // allStocks[idx]
+            cnt = cnt + 1;
+        } catch (error) {
+            console.log("name not found");
+        }
+        idx = idx + 1;
+
+    }
+
+
+    res.status(200).json({
+        success: true,
+        topstocks,
+    });
+});
+
+export const getpopular = catchAsyncError(async (req, res, next) => {
+    const stocks = await Stock.find({});
+    const allStocks = stocks[0].popular;
+    // Sort allStocks by regularMarketChangePercent in ascending order for losers
+    // allStocks.sort((a, b) => a.regularMarketChangePercent - b.regularMarketChangePercent);
 
     // Get the top 5 stocks
     let cnt = 0;
