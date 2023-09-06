@@ -53,24 +53,32 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
         );
 
         // Filter and process logoData as needed
+        const filteredLogoData = logoData.filter((item) => (
+            item !== null &&
+            item.regularMarketChangeRS !== null &&
+            item.CurrentPrice !== null &&
+            item.regularMarketChangePercent !== null &&
+            item.regularMarketPreviousClose !== null
+        ));
+
 
         const allpart = await Stock.findOne({});
 
         switch (number) {
             case 1:
-                allpart.part1 = logoData;
+                allpart.part1 = filteredLogoData;
                 break;
             case 2:
-                allpart.part2 = logoData;
+                allpart.part2 = filteredLogoData;
                 break;
             case 3:
-                allpart.part3 = logoData;
+                allpart.part3 = filteredLogoData;
                 break;
             case 4:
-                allpart.part4 = logoData;
+                allpart.part4 = filteredLogoData;
                 break;
             case 5:
-                allpart.part5 = logoData;
+                allpart.part5 = filteredLogoData;
                 break;
             default:
                 return res.status(404).json({
