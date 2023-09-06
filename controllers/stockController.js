@@ -10,21 +10,46 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
 
         // });
         const { number } = req.body;
+        // let alldatasymbol=[]
+
         const response = await axios.get(
             "https://api.twelvedata.com/stocks?mic_code=XNSE&source=docs"
         );
         const data = response.data.data;
 
-        const symbolsWithoutPeriod = data.filter(symbol => !symbol.symbol.includes("."));
-        // console.log(symbolsWithoutPeriod.length);
+        const response1 = await axios.get(
+            "https://api.twelvedata.com/stocks?mic_code=XBOM&source=docs"
+        );
+        const data1 = response1.data.data;
+
+
+        // Combine the data and data1 arrays
+        const alldatasymbol = data.concat(
+            data1.filter((item1) => !data.some((item) => item.symbol === item1.symbol))
+        );
+
+        const symbolsWithoutPeriod = alldatasymbol.filter(symbol => !symbol.symbol.includes("."));
+        console.log(symbolsWithoutPeriod.length);
         const totalSymbols = symbolsWithoutPeriod.length;
         const partSize = Math.ceil(totalSymbols / 4);
 
         // Divide the symbols into four parts
-        const part1 = symbolsWithoutPeriod.slice(0, partSize).map((item) => item.symbol);
-        const part2 = symbolsWithoutPeriod.slice(partSize, 2 * partSize).map((item) => item.symbol);
-        const part3 = symbolsWithoutPeriod.slice(2 * partSize, 3 * partSize).map((item) => item.symbol);
-        const part4 = symbolsWithoutPeriod.slice(3 * partSize, 4 * partSize).map((item) => item.symbol);
+        const part1 = symbolsWithoutPeriod
+            .slice(0, partSize)
+            .map((item) => (item.exchange === 'NSE' ? item.symbol + '.NS' : item.exchange === 'BSE' ? item.symbol + '.BO' : item.symbol));
+
+        const part2 = symbolsWithoutPeriod
+            .slice(partSize, 2 * partSize)
+            .map((item) => (item.exchange === 'NSE' ? item.symbol + '.NS' : item.exchange === 'BSE' ? item.symbol + '.BO' : item.symbol));
+
+        const part3 = symbolsWithoutPeriod
+            .slice(2 * partSize, 3 * partSize)
+            .map((item) => (item.exchange === 'NSE' ? item.symbol + '.NS' : item.exchange === 'BSE' ? item.symbol + '.BO' : item.symbol));
+
+        const part4 = symbolsWithoutPeriod
+            .slice(3 * partSize, 4 * partSize)
+            .map((item) => (item.exchange === 'NSE' ? item.symbol + '.NS' : item.exchange === 'BSE' ? item.symbol + '.BO' : item.symbol));
+
         // const part4 = symbolsWithoutPeriod.slice(1600, 1610).map((item) => item.symbol);
 
 
@@ -53,11 +78,13 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
         const logoData = await Promise.all(
             part.map(async (symbol) => {
                 // console.log(symbol);
-                const s = symbol + ".NS";
+                // const s = symbol + ".NS";
                 // if (s !== "JTLINFRA.NS" && "KPIGLOBAL.NS") {
-                const url = `https://query1.finance.yahoo.com/v7/finance/options/${s}?modules=financialData`;
-                const url1 = `https://query1.finance.yahoo.com/v8/finance/chart/${s}?region=US&lang=en-US&includePrePost=false&interval=1d&range=5d&corsDomain=finance.yahoo.com&.tsrc=financed`
+                // console.log(symbol);
+                const url = `https://query1.finance.yahoo.com/v7/finance/options/${symbol}?modules=financialData`;
+                const url1 = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?region=US&lang=en-US&includePrePost=false&interval=1d&range=5d&corsDomain=finance.yahoo.com&.tsrc=financed`
                 return fetchStockDataWithRetries(url, url1);
+                // return null;
                 // }
             })
         );
@@ -170,7 +197,7 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
             success: true,
         });
     } catch (error) {
-        console.log("error2 ", error);
+        console.log("error2 ");
         res.status(400).json({
             error: true,
         });
@@ -505,7 +532,7 @@ const fetchStockDataWithRetries = async (url, url1) => {
         const closeArray = response.data.chart.result[0].indicators.quote[0].close;
         if (closeArray === undefined) { console.log("not found Array"); return null; }
 
-        let secondToLastValue = 0, lastValue = 0;
+        let secondToLastValue = null, lastValue = null;
         if (closeArray.length >= 2) {
             const lastTwoValues = closeArray.slice(-2);
             // Now, lastTwoValues contains the last two values of the array
@@ -517,6 +544,9 @@ const fetchStockDataWithRetries = async (url, url1) => {
         } else {
             // Handle the case where the array has fewer than 2 values
             console.log("Array has fewer than 2 values");
+            return null;
+        }
+        if (secondToLastValue === null || lastValue === null) {
             return null;
         }
         // const name = response1.data.optionChain.result[0].quote.longName;
@@ -549,7 +579,7 @@ const fetchStockDataWithRetries = async (url, url1) => {
             // return null;
         } else {
             // Handle other errors
-            console.log(`Error fetching data for ${url}:`, error);
+            console.log(`Error fetching data for ${url}`);
             return null;
         }
         // return null;
@@ -602,11 +632,37 @@ export const topGainer = catchAsyncError(async (req, res, next) => {
     allStocks.sort((a, b) => b.regularMarketChangePercent - a.regularMarketChangePercent);
 
     // Get the top 5 stocks
-    const top5Stocks = allStocks.slice(0, 5);
+    // const top5Stocks = allStocks.slice(0, 5);
+    let cnt = 0;
+    let idx = 0;
+
+    let topstocks = [];
+    while (cnt < 5) {
+        const s = allStocks[idx].symbol;
+        const url = `https://query1.finance.yahoo.com/v7/finance/options/${s}?modules=financialData`;
+        const response1 = await axios.get(url);
+        try {
+            let name = response1.data.optionChain.result[0].quote.longName;
+            let temp = allStocks[idx];
+            // console.log(name)
+            temp.name = name;
+            // console.log(temp)
+            topstocks.push(temp);
+            // topstocks.back().name = name;
+            // allStocks[idx].name = 
+            // allStocks[idx]
+            cnt = cnt + 1;
+        } catch (error) {
+            console.log("name not found");
+        }
+        idx = idx + 1;
+
+    }
+
 
     res.status(200).json({
         success: true,
-        top5Stocks,
+        topstocks,
     });
 });
 
@@ -622,16 +678,43 @@ export const topLosers = catchAsyncError(async (req, res, next) => {
         ...stocks[0].part3,
         ...stocks[0].part4,
     ];
+    console.log(allStocks.length);
 
     // Sort allStocks by regularMarketChangePercent in descending order
     allStocks.sort((a, b) => a.regularMarketChangePercent - b.regularMarketChangePercent);
 
     // Get the top 5 stocks
-    const top5Stocks = allStocks.slice(0, 5);
+    // const top5Stocks = allStocks.slice(0, 5);
+    let cnt = 0;
+    let idx = 0;
+
+    let topstocks = [];
+    while (cnt < 5) {
+        const s = allStocks[idx].symbol;
+        const url = `https://query1.finance.yahoo.com/v7/finance/options/${s}?modules=financialData`;
+        const response1 = await axios.get(url);
+        try {
+            let name = response1.data.optionChain.result[0].quote.longName;
+            let temp = allStocks[idx];
+            // console.log(name)
+            temp.name = name;
+            // console.log(temp)
+            topstocks.push(temp);
+            // topstocks.back().name = name;
+            // allStocks[idx].name = 
+            // allStocks[idx]
+            cnt = cnt + 1;
+        } catch (error) {
+            console.log("name not found");
+        }
+        idx = idx + 1;
+
+    }
+
 
     res.status(200).json({
         success: true,
-        top5Stocks,
+        topstocks,
     });
 });
 
