@@ -22,7 +22,7 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
             dataBSE.filter((itemBSE) => !dataNSE.some((itemNSE) => itemNSE.symbol === itemBSE.symbol))
         );
 
-        const symbolsWithoutPeriod = alldatasymbol.filter(symbol => !symbol.symbol.includes(".")).slice(0, 5);
+        const symbolsWithoutPeriod = alldatasymbol.filter(symbol => !symbol.symbol.includes("."));
         const totalSymbols = symbolsWithoutPeriod.length;
         const partSize = Math.ceil(totalSymbols / 5);
 
