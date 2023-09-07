@@ -20,7 +20,7 @@ app.use(
 app.use(cookieParser({ limit: '50mb' }));
 app.use(
     cors({
-        origin: process.env.FRONTEND_URL,
+        origin: true,
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE"],
     })
@@ -28,9 +28,10 @@ app.use(
 
 // // Importing & Using Routes
 import stock from "./routes/stocksRoute.js";
-
+import user from "./routes/userRoute.js";
 
 app.use("/api/v1", stock);
+app.use("/api/v1", user);
 
 
 export default app;

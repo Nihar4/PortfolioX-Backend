@@ -53,6 +53,22 @@ const schema = new mongoose.Schema({
         regularMarketPreviousClose: Number,
         regularMarketChangePercent: Number,
     }],
+    part7: [{
+        name: String,
+        symbol: String,
+        CurrentPrice: Number,
+        regularMarketChangeRS: Number,
+        regularMarketPreviousClose: Number,
+        regularMarketChangePercent: Number,
+    }],
+    part8: [{
+        name: String,
+        symbol: String,
+        CurrentPrice: Number,
+        regularMarketChangeRS: Number,
+        regularMarketPreviousClose: Number,
+        regularMarketChangePercent: Number,
+    }],
     popular: [{
         name: String,
         symbol: String,
