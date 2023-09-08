@@ -2,9 +2,12 @@ export const sendToken = (res, user, message, statusCode = 200) => {
     const token = user.getJWTToken();
     const options = {
         expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
+        // httpOnly: true,
+        // secure: true,
+        // sameSite: "none",
+        httpOnly: false,
+        secure: false,
+        sameSite: false,
     };
 
     res.status(statusCode).cookie("token", token, options).json({
@@ -12,4 +15,10 @@ export const sendToken = (res, user, message, statusCode = 200) => {
         message,
         user,
     });
+    // res.status(statusCode).json({
+    //     success: true,
+    //     message,
+    //     token,
+    //     user,
+    // });
 };

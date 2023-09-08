@@ -12,7 +12,7 @@ import getDataUri from "../utils/dataUri.js";
 export const register = catchAsyncError(async (req, res, next) => {
     const { name, email, password } = req.body;
     const file = req.file;
-    console.log(name, email, password);
+    console.log(name, email, password, file);
     if (!name || !email || !password || !file)
         return next(new ErrorHandler("Please enter all field", 400));
 
@@ -22,6 +22,7 @@ export const register = catchAsyncError(async (req, res, next) => {
 
     const fileUri = getDataUri(file);
     const mycloud = await cloudinary.v2.uploader.upload(fileUri.content);
+    console.log("here");
 
     user = await Users.create({
         name,
@@ -32,6 +33,7 @@ export const register = catchAsyncError(async (req, res, next) => {
             url: mycloud.secure_url,
         },
     });
+    console.log("here");
 
     sendToken(res, user, "Registered Successfully", 201);
 });
@@ -57,11 +59,11 @@ export const login = catchAsyncError(async (req, res, next) => {
 export const logout = catchAsyncError(async (req, res, next) => {
     res
         .status(200)
-        .cookie("token", null, {
+        .cookie("token", "", {
             expires: new Date(Date.now()),
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
+            httpOnly: false,
+            secure: false,
+            sameSite: false,
         })
         .json({
             success: true,
@@ -140,55 +142,63 @@ export const updateprofilepicture = catchAsyncError(async (req, res, next) => {
 
 export const forgetPassword = catchAsyncError(async (req, res, next) => {
     const { email } = req.body;
-
     const user = await Users.findOne({ email });
 
-    if (!user) return next(new ErrorHandler("User not found", 400));
+    if (!user) return next(new ErrorHandler("Incorrect Email", 404));
+    // max,min 2000,10000
+    // math.random()*(max-min)+min
 
-    const resetToken = await user.getResetToken();
+    const randomNumber = Math.random() * (999999 - 100000) + 100000;
+    const otp = Math.floor(randomNumber);
+    const otp_expire = 15 * 60 * 1000;
 
+    user.otp = otp;
+    user.otp_expire = new Date(Date.now() + otp_expire);
     await user.save();
 
-    const url = `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`;
-
-    const message = `Click on the link to reset your password. ${url}. If you have not request then please ignore.`;
-
-    // Send token via email
-    await sendEmail(user.email, "CourseBundler Reset Password", message);
+    const message = `Your OTP for Reseting Password is ${otp}.\n Please ignore if you haven't requested this.`;
+    console.log(message);
+    try {
+        await sendEmail(user.email, "OTP For Reseting Password", message);
+    } catch (error) {
+        user.otp = null;
+        user.otp_expire = null;
+        await user.save();
+        return next(error);
+    }
 
     res.status(200).json({
         success: true,
-        message: `Reset Token has been sent to ${user.email}`,
+        message: `Email Sent To ${user.email}`,
     });
 });
 
-export const resetPassword = catchAsyncError(async (req, res, next) => {
-    const { token } = req.params;
 
-    const resetPasswordToken = crypto
-        .createHash("sha256")
-        .update(token)
-        .digest("hex");
+export const resetPassword = catchAsyncError(async (req, res, next) => {
+    const { otp, password } = req.body;
 
     const user = await Users.findOne({
-        resetPasswordToken,
-        resetPasswordExpire: {
+        otp,
+        otp_expire: {
             $gt: Date.now(),
         },
     });
 
     if (!user)
-        return next(new ErrorHandler("Token is invalid or has been expired", 401));
+        return next(new ErrorHandler("Incorrect OTP or has been expired", 400));
 
-    user.password = req.body.password;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpire = undefined;
+    if (!password)
+        return next(new ErrorHandler("Please Enter New Password", 400));
+
+    user.password = password;
+    user.otp = undefined;
+    user.otp_expire = undefined;
 
     await user.save();
 
     res.status(200).json({
         success: true,
-        message: "Password Changed Successfully",
+        message: "Password Changed Successfully, You can login now",
     });
 });
 
@@ -220,5 +230,22 @@ export const removeFromPlaylist = catchAsyncError(async (req, res, next) => {
     res.status(200).json({
         success: true,
         message: "Removed From Watchlist",
+    });
+});
+export const contact = catchAsyncError(async (req, res, next) => {
+    const { name, email, message } = req.body;
+    console.log(name, email, message);
+    if (!name || !email || !message)
+        return next(new ErrorHandler("All fields are mandatory", 400));
+
+    const to = process.env.MY_MAIL;
+    const subject = "Contact from PortfolioX";
+    const text = `I am ${name} and my Email is ${email}. \n${message}`;
+
+    await sendEmail(to, subject, text);
+
+    res.status(200).json({
+        success: true,
+        message: "Your Message Has Been Sent.",
     });
 });

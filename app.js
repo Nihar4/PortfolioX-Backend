@@ -20,7 +20,7 @@ app.use(
 app.use(cookieParser({ limit: '50mb' }));
 app.use(
     cors({
-        origin: process.env.FRONTEND_URL,
+        origin: true,
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE"],
     })
