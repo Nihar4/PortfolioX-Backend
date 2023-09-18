@@ -233,15 +233,22 @@ export const topGainer = catchAsyncError(async (req, res, next) => {
         const response1 = await axios.get(url);
         try {
             let name = response1.data.optionChain.result[0].quote.longName;
-            let temp = allStocks[idx];
-            // console.log(name)
-            temp.name = name;
-            // console.log(temp)
-            topstocks.push(temp);
-            // topstocks.back().name = name;
-            // allStocks[idx].name = 
-            // allStocks[idx]
-            cnt = cnt + 1;
+            if (name === undefined || name === null) {
+                // console.log("not found")
+            }
+            else {
+                // console.log(name)
+                let temp = allStocks[idx];
+                // console.log(name)
+                temp.name = name;
+                // console.log(temp)
+                topstocks.push(temp);
+                // topstocks.back().name = name;
+                // allStocks[idx].name = 
+                // allStocks[idx]
+                cnt = cnt + 1;
+            }
+
         } catch (error) {
             console.log("name not found");
         }
