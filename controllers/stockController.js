@@ -178,7 +178,8 @@ const fetchStockDataWithRetries = async (url, url1) => {
 
             return null;
         } else {
-            console.log(`Error fetching data for ${url}`);
+            console.log(error)
+            console.log(`Error fetching data for ${url1}`);
             return null;
         }
     }
