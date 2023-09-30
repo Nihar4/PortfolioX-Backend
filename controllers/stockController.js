@@ -1,6 +1,7 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import axios from "axios";
 import { Stock } from "../models/stock.js";
+import { Users } from "../models/user.js";
 
 
 export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
@@ -185,6 +186,71 @@ const fetchStockDataWithRetries = async (url, url1) => {
     }
 
 }
+
+export const BookmarkData = catchAsyncError(async (req, res, next) => {
+    const user = await Users.findById(req.user._id);
+
+    const logoData = await Promise.all(
+        user.watchlist.map(async (symbol) => {
+            const url = `https://query1.finance.yahoo.com/v7/finance/options/${symbol.symbol}?modules=financialData`;
+            const url1 = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol.symbol}?region=US&lang=en-US&includePrePost=false&interval=1d&range=5d&corsDomain=finance.yahoo.com&.tsrc=financed`;
+
+            // Fetch additional data including the name
+            const additionalData = await fetchAdditionalData(url);
+
+            // Combine additional data with the existing data
+            return {
+                ...additionalData,
+                ...await fetchStockDataWithRetries(url, url1)
+            };
+        })
+    );
+
+    res.status(200).json({
+        success: true,
+        logoData,
+    });
+});
+
+export const PortfolioData = catchAsyncError(async (req, res, next) => {
+    const user = await Users.findById(req.user._id);
+
+    const logoData = await Promise.all(
+        user.portfolio.map(async (symbol) => {
+            const url1 = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol.symbol}?region=US&lang=en-US&includePrePost=false&interval=1d&range=5d&corsDomain=finance.yahoo.com&.tsrc=financed`;
+            const response = await axios.get(url1);
+            const CurrentPrice = response.data.chart.result[0].meta.regularMarketPrice;
+
+            // Create a new object that includes all properties from the original symbol object
+            symbol.currentprice = CurrentPrice;
+
+            return symbol;
+        })
+    );
+    console.log(logoData)
+    res.status(200).json({
+        success: true,
+        logoData,
+    });
+});
+
+
+
+
+async function fetchAdditionalData(url) {
+    try {
+        const response1 = await axios.get(url);
+
+        // Extract the name from the response (modify this based on the actual response structure)
+        const name = response1.data.optionChain.result[0].quote.longName;
+
+        return { name };
+    } catch (error) {
+        console.error('Error fetching additional data:', error);
+        return { name: 'N/A' }; // Provide a default name or error handling as needed
+    }
+}
+
 
 export const getAllStocks = catchAsyncError(async (req, res, next) => {
     const stocks = await Stock.find({});

@@ -55,14 +55,19 @@ const schema = new mongoose.Schema({
             quantity: {
                 type: Number
             },
-            buyingprice: {
+            avgbuyingprice: {
                 type: Number
             },
-            investprice: {
+            currentprice: {
                 type: Number
+            },
+            subscription: {
+                id: String,
+                status: String,
             },
         },
     ],
+
 
     createdAt: {
         type: Date,

@@ -5,6 +5,7 @@ import {
     contact,
     forgetPassword,
     getMyProfile,
+    isBookmark,
     login,
     logout,
     register,
@@ -55,6 +56,9 @@ router.route("/contact").post(contact);
 router.route("/addtoplaylist").post(isAuthenticated, addToPlaylist);
 
 // // RemoveFromPlaylist
-router.route("/removefromplaylist").delete(isAuthenticated, removeFromPlaylist);
+router.route("/removefromplaylist").post(isAuthenticated, removeFromPlaylist);
+
+router.route("/isbookmark").get(isAuthenticated, isBookmark);
+
 
 export default router;

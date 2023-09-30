@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "type": "module",
-   "engines": {
+  "engines": {
     "node": "18.x"
   },
   "scripts": {
@@ -29,6 +29,7 @@
     "node-cron": "^3.0.2",
     "nodemailer": "^6.9.3",
     "razorpay": "^2.9.0",
+    "stripe": "^13.8.0",
     "validator": "^13.9.0"
   }
 }

@@ -218,20 +218,42 @@ export const addToPlaylist = catchAsyncError(async (req, res, next) => {
     });
 });
 
+export const isBookmark = catchAsyncError(async (req, res, next) => {
+    const user = await Users.findById(req.user._id);
+    const { name, symbol } = req.body;
+    let Bookmark = false;
+    user.watchlist.map((item, index) => {
+        if (item.name === name && item.symbol === symbol) {
+            Bookmark = true;
+            return;
+        }
+    })
+    res.status(200).json({
+        success: true,
+        Bookmark,
+    });
+});
+
+
+
+
 export const removeFromPlaylist = catchAsyncError(async (req, res, next) => {
     const user = await Users.findById(req.user._id);
     const { name, symbol } = req.body;
+    console.log(name, symbol)
     const newWatchlist = user.watchlist.filter((item) => {
         if (item.symbol !== symbol) return item;
     });
 
     user.watchlist = newWatchlist;
+    console.log(newWatchlist)
     await user.save();
     res.status(200).json({
         success: true,
         message: "Removed From Watchlist",
     });
 });
+
 export const contact = catchAsyncError(async (req, res, next) => {
     const { name, email, message } = req.body;
     console.log(name, email, message);
