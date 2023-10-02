@@ -1,7 +1,7 @@
 import app from "./app.js";
 import { connectDB } from "./config/database.js";
 import cloudinary from "cloudinary";
-import RazorPay from "razorpay";
+// import RazorPay from "razorpay";
 import Stripe from "stripe";
 
 connectDB();
@@ -12,10 +12,10 @@ cloudinary.v2.config({
     api_secret: process.env.CLOUDINARY_CLIENT_SECRET,
 });
 
-export const instance = new RazorPay({
-    key_id: process.env.RAZORPAY_API_KEY,
-    key_secret: process.env.RAZORPAY_API_SECRET,
-});
+// export const instance = new RazorPay({
+//     key_id: process.env.RAZORPAY_API_KEY,
+//     key_secret: process.env.RAZORPAY_API_SECRET,
+// });
 
 export const stripe = new Stripe(process.env.STRIPE_API_SECRET);
 
