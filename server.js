@@ -3,6 +3,7 @@ import { connectDB } from "./config/database.js";
 import cloudinary from "cloudinary";
 // import RazorPay from "razorpay";
 import Stripe from "stripe";
+// const Stripe = require('stripe');
 
 connectDB();
 

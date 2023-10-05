@@ -60,7 +60,7 @@ export const buySubscription1 = catchAsyncError(async (req, res, next) => {
     const { name, symbol, quantity, avgbuyingprice } = req.body;
 
     const { client_secret } = await stripe.paymentIntents.create({
-        amount: Number(quantity * avgbuyingprice * 100),
+        amount: (parseFloat(quantity) * avgbuyingprice).toFixed(2) * 100,
         currency: "inr",
     });
 
