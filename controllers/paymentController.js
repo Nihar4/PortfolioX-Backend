@@ -215,11 +215,15 @@ export const paymentVerification1 = catchAsyncError(async (req, res, next) => {
             name: stock.name,
             symbol: stock.symbol,
             quantity: stock2.quantity + stock.quantity,
-            avgbuyingprice: ((stock.quantity * stock.avgbuyingprice) + (stock2.quantity * stock2.avgbuyingprice)) / (stock2.quantity + stock.quantity),
+            avgbuyingprice: parseFloat((((stock.quantity * stock.avgbuyingprice) + (stock2.quantity * stock2.avgbuyingprice)) / (stock2.quantity + stock.quantity)).toFixed(2)),
             subscription: {
                 id: stock.subscription.id,
                 status: "active"
-            }
+            },
+            quantityList: [...stock2.quantityList, stock.quantity],
+            buyingPriceList: [...stock2.buyingPriceList, stock.avgbuyingprice],
+            buyingDateList: [...stock2.buyingDateList, new Date()]
+
         })
         user.portfolio = newPortfolio1;
     }
@@ -232,7 +236,10 @@ export const paymentVerification1 = catchAsyncError(async (req, res, next) => {
             subscription: {
                 id: stock.subscription.id,
                 status: "active"
-            }
+            },
+            quantityList: [stock.quantity],
+            buyingPriceList: [stock.avgbuyingprice],
+            buyingDateList: [new Date()]
         })
         user.portfolio = newPortfolio;
     }

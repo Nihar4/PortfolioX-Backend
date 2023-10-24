@@ -65,9 +65,19 @@ const schema = new mongoose.Schema({
                 id: String,
                 status: String,
             },
+            quantityList: {
+                type: [Number],
+            },
+            buyingPriceList: {
+                type: [Number],
+            },
+            buyingDateList: {
+                type: [Date],
+            },
         },
     ],
 
+    // name symbol qnt price date 
 
     createdAt: {
         type: Date,
