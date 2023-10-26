@@ -1,5 +1,6 @@
 import express from "express";
 import {
+    SellStock,
     // buySubscription,
     buySubscription1,
     // cancelSubscription,
@@ -26,6 +27,6 @@ router.route("/paymentverification").post(isAuthenticated, paymentVerification1)
 router.route("/razorpaykey").get(getRazorPayKey);
 
 // Cancel Subscription
-// router.route("/subscribe/cancel").delete(isAuthenticated, cancelSubscription);
+router.route("/sellstock").put(isAuthenticated, SellStock);
 
 export default router;

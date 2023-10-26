@@ -71,6 +71,9 @@ const schema = new mongoose.Schema({
             buyingPriceList: {
                 type: [Number],
             },
+            status: {
+                type: [String]
+            },
             buyingDateList: {
                 type: [Date],
             },

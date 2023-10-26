@@ -3,6 +3,8 @@ import { Users } from "../models/user.js";
 import ErrorHandler from "../utils/errorHandler.js";
 // import { instance } from "../server.js";
 import crypto from "crypto";
+import axios from "axios";
+
 import { Payment } from "../models/payment.js";
 import { stripe } from "../server.js";
 
@@ -222,7 +224,8 @@ export const paymentVerification1 = catchAsyncError(async (req, res, next) => {
             },
             quantityList: [...stock2.quantityList, stock.quantity],
             buyingPriceList: [...stock2.buyingPriceList, stock.avgbuyingprice],
-            buyingDateList: [...stock2.buyingDateList, new Date()]
+            buyingDateList: [...stock2.buyingDateList, new Date()],
+            status: [...stock2.status, "Buy"]
 
         })
         user.portfolio = newPortfolio1;
@@ -239,7 +242,9 @@ export const paymentVerification1 = catchAsyncError(async (req, res, next) => {
             },
             quantityList: [stock.quantity],
             buyingPriceList: [stock.avgbuyingprice],
-            buyingDateList: [new Date()]
+            buyingDateList: [new Date()],
+            status: ["Buy"]
+
         })
         user.portfolio = newPortfolio;
     }
@@ -264,42 +269,45 @@ export const getRazorPayKey = catchAsyncError(async (req, res, next) => {
     });
 });
 
-// export const cancelSubscription = catchAsyncError(async (req, res, next) => {
-//     const user = await Users.findById(req.user._id);
+export const SellStock = catchAsyncError(async (req, res, next) => {
+    const user = await Users.findById(req.user._id);
 
-//     const subscriptionId = user.subscription.id;
-//     console.log(subscriptionId)
-//     let refund = false;
+    const { symbol, quantity } = req.body;
+    const stockItem = user.portfolio.find((item) => item.symbol === symbol);
+    const newPortfolio = user.portfolio.filter((item) => item.symbol !== symbol);
+    const url1 = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?region=US&lang=en-US&includePrePost=false&interval=1d&range=5d&corsDomain=finance.yahoo.com&.tsrc=financed`
+    const response = await axios.get(url1);
 
-//     // try {
-//     await instance.subscriptions.cancel(subscriptionId);
-//     // } catch (error) {
-//     // console.log(error);
-//     // }
+    const CurrentPrice = response.data.chart.result[0].meta.regularMarketPrice;
+    // console.log("new", newPortfolio);
+    // console.log(stockItem)
+    if (stockItem.quantity > quantity) {
+        newPortfolio.push({
+            name: stockItem.name,
+            symbol: stockItem.symbol,
+            quantity: stockItem.quantity - quantity,
+            avgbuyingprice: stockItem.avgbuyingprice,
+            subscription: stockItem.subscription,
+            quantityList: [...stockItem.quantityList, quantity],
+            buyingPriceList: [...stockItem.buyingPriceList, CurrentPrice],
+            buyingDateList: [...stockItem.buyingDateList, new Date()],
+            status: [...stockItem.status, "Sell"]
+        })
+        user.portfolio = newPortfolio;
+        await user.save();
 
+    }
+    else if (stockItem.quantity === quantity) {
+        user.portfolio = newPortfolio;
+        await user.save();
 
-//     const payment = await Payment.findOne({
-//         razorpay_subscription_id: subscriptionId,
-//     });
-//     console.log(payment);
-//     const gap = Date.now() - payment.createdAt;
+    }
+    else {
+        return next(new ErrorHandler("Quantity error", 400));
+    }
+    res.status(200).json({
+        success: true,
+        message: "Successfully Sell the Stock",
 
-//     const refundTime = process.env.REFUND_DAYS * 24 * 60 * 60 * 1000;
-
-//     if (refundTime > gap) {
-//         await instance.payments.refund(payment.razorpay_payment_id);
-//         refund = true;
-//     }
-
-//     await payment.deleteOne();
-//     user.subscription.id = undefined;
-//     user.subscription.status = undefined;
-//     await user.save();
-
-//     res.status(200).json({
-//         success: true,
-//         message: refund
-//             ? "Subscription cancelled, You will receive full refund within 7 days."
-//             : "Subscription cancelled, Now refund initiated as subscription was cancelled after 7 days.",
-//     });
-// });
+    });
+});
