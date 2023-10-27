@@ -4,7 +4,6 @@ import { Users } from "../models/user.js";
 import { sendToken } from "../utils/sendToken.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import crypto from "crypto";
-
 import cloudinary from "cloudinary";
 import getDataUri from "../utils/dataUri.js";
 
@@ -119,7 +118,10 @@ export const updateProfile = catchAsyncError(async (req, res, next) => {
 
 export const updateprofilepicture = catchAsyncError(async (req, res, next) => {
     const file = req.file;
-
+    console.log(file)
+    if (!file) {
+        return next(new ErrorHandler("Please Select the Image TO Update ", 400));
+    }
     const user = await Users.findById(req.user._id);
 
     const fileUri = getDataUri(file);
@@ -145,9 +147,6 @@ export const forgetPassword = catchAsyncError(async (req, res, next) => {
     const user = await Users.findOne({ email });
 
     if (!user) return next(new ErrorHandler("Incorrect Email", 404));
-    // max,min 2000,10000
-    // math.random()*(max-min)+min
-
     const randomNumber = Math.random() * (999999 - 100000) + 100000;
     const otp = Math.floor(randomNumber);
     const otp_expire = 15 * 60 * 1000;
@@ -157,7 +156,7 @@ export const forgetPassword = catchAsyncError(async (req, res, next) => {
     await user.save();
 
     const message = `Your OTP for Reseting Password is ${otp}.\n Please ignore if you haven't requested this.`;
-    console.log(message);
+    // console.log(message);
     try {
         await sendEmail(user.email, "OTP For Reseting Password", message);
     } catch (error) {
@@ -234,9 +233,6 @@ export const isBookmark = catchAsyncError(async (req, res, next) => {
     });
 });
 
-
-
-
 export const removeFromPlaylist = catchAsyncError(async (req, res, next) => {
     const user = await Users.findById(req.user._id);
     const { name, symbol } = req.body;
@@ -269,5 +265,42 @@ export const contact = catchAsyncError(async (req, res, next) => {
     res.status(200).json({
         success: true,
         message: "Your Message Has Been Sent.",
+    });
+});
+
+export const getReport = catchAsyncError(async (req, res, next) => {
+    const user = await Users.findById(req.user._id);
+    const { from, to } = req.body;
+    const report = []
+    const fromDate = new Date(
+        from.split("/").reverse().join("-") + "T00:00:00Z"
+    );
+    const toDate = new Date(
+        to.split("/").reverse().join("-") + "T23:59:59Z"
+    );
+    if (fromDate > toDate) {
+        return next(new ErrorHandler("Please Enter Valid Date", 400));
+    }
+    if (user.portfolio.length > 0) {
+        user.portfolio.map((item, index) => {
+            item.buyingDateList.map((item1, index1) => {
+                const item1Date = new Date(item1);
+                if (item1Date >= fromDate && item1Date <= toDate) {
+                    const temp = {
+                        name: item.name,
+                        symbol: item.symbol,
+                        quantity: item.quantityList[index1],
+                        buyingprice: item.buyingPriceList[index1],
+                        status: item.status[index1],
+                        date: item1Date
+                    }
+                    report.push(temp);
+                }
+            });
+        });
+    }
+    res.status(200).json({
+        success: true,
+        report,
     });
 });
