@@ -281,22 +281,23 @@ export const getReport = catchAsyncError(async (req, res, next) => {
     if (fromDate > toDate) {
         return next(new ErrorHandler("Please Enter Valid Date", 400));
     }
-    if (user.portfolio.length > 0) {
-        user.portfolio.map((item, index) => {
-            item.buyingDateList.map((item1, index1) => {
-                const item1Date = new Date(item1);
-                if (item1Date >= fromDate && item1Date <= toDate) {
-                    const temp = {
-                        name: item.name,
-                        symbol: item.symbol,
-                        quantity: item.quantityList[index1],
-                        buyingprice: item.buyingPriceList[index1],
-                        status: item.status[index1],
-                        date: item1Date
-                    }
-                    report.push(temp);
+    console.log(user)
+    if (user.History.length > 0) {
+        user.History.map((item, index) => {
+            console.log(item.date)
+            const item1Date = new Date(item.date);
+            if (item1Date >= fromDate && item1Date <= toDate) {
+                const temp = {
+                    name: item.name,
+                    symbol: item.symbol,
+                    quantity: item.quantity,
+                    buyingprice: item.Price,
+                    status: item.status,
+                    date: item1Date
                 }
-            });
+                report.push(temp);
+            }
+
         });
     }
     res.status(200).json({

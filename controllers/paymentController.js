@@ -250,6 +250,14 @@ export const paymentVerification1 = catchAsyncError(async (req, res, next) => {
     }
 
     // user.subscription.status = "active";
+    user.History.push({
+        name: stock.name,
+        symbol: stock.symbol,
+        quantity: stock.quantity,
+        Price: stock.avgbuyingprice,
+        status: "Buy",
+        date: new Date(),
+    })
 
     await user.save();
 
@@ -273,15 +281,15 @@ export const SellStock = catchAsyncError(async (req, res, next) => {
     const user = await Users.findById(req.user._id);
 
     const { symbol, quantity } = req.body;
+    console.log(symbol, quantity)
     const stockItem = user.portfolio.find((item) => item.symbol === symbol);
     const newPortfolio = user.portfolio.filter((item) => item.symbol !== symbol);
     const url1 = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?region=US&lang=en-US&includePrePost=false&interval=1d&range=5d&corsDomain=finance.yahoo.com&.tsrc=financed`
     const response = await axios.get(url1);
 
     const CurrentPrice = response.data.chart.result[0].meta.regularMarketPrice;
-    // console.log("new", newPortfolio);
-    // console.log(stockItem)
-    if (stockItem.quantity > quantity) {
+
+    if (stockItem.quantity > Number(quantity)) {
         newPortfolio.push({
             name: stockItem.name,
             symbol: stockItem.symbol,
@@ -294,11 +302,31 @@ export const SellStock = catchAsyncError(async (req, res, next) => {
             status: [...stockItem.status, "Sell"]
         })
         user.portfolio = newPortfolio;
+
+        user.History.push({
+            name: stockItem.name,
+            symbol: stockItem.symbol,
+            quantity: quantity,
+            Price: CurrentPrice,
+            status: "Sell",
+            date: new Date(),
+        })
+
         await user.save();
 
     }
-    else if (stockItem.quantity === quantity) {
+    else if (stockItem.quantity === Number(quantity)) {
         user.portfolio = newPortfolio;
+
+        user.History.push({
+            name: stockItem.name,
+            symbol: stockItem.symbol,
+            quantity: quantity,
+            Price: CurrentPrice,
+            status: "Sell",
+            date: new Date(),
+        })
+
         await user.save();
 
     }

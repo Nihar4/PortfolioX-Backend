@@ -79,6 +79,28 @@ const schema = new mongoose.Schema({
             },
         },
     ],
+    History: [
+        {
+            name: {
+                type: String,
+            },
+            symbol: {
+                type: String,
+            },
+            quantity: {
+                type: Number
+            },
+            Price: {
+                type: Number
+            },
+            status: {
+                type: String
+            },
+            date: {
+                type: Date
+            }
+        },
+    ],
 
     // name symbol qnt price date 
 
