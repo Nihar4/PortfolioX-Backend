@@ -273,7 +273,9 @@ export const getAllStocks = catchAsyncError(async (req, res, next) => {
     });
 });
 
-export const topGainer = catchAsyncError(async (req, res, next) => {
+
+
+const fetchTopGainer = async () => {
     const stocks = await Stock.find({});
     const allStocks = [
         ...stocks[0].part1,
@@ -322,14 +324,10 @@ export const topGainer = catchAsyncError(async (req, res, next) => {
         idx = idx + 1;
 
     }
+    return topstocks
+};
 
-    res.status(200).json({
-        success: true,
-        topstocks,
-    });
-});
-
-export const topLosers = catchAsyncError(async (req, res, next) => {
+const fetchTopLosers = async () => {
     const stocks = await Stock.find({});
     const allStocks = [
         ...stocks[0].part1,
@@ -372,14 +370,11 @@ export const topLosers = catchAsyncError(async (req, res, next) => {
 
     }
 
+    return topstocks
 
-    res.status(200).json({
-        success: true,
-        topstocks,
-    });
-});
+};
 
-export const getpopular = catchAsyncError(async (req, res, next) => {
+const fetchPopularStocks = async () => {
     const stocks = await Stock.find({});
     const allStocks = stocks[0].popular;
     // Sort allStocks by regularMarketChangePercent in ascending order for losers
@@ -411,11 +406,20 @@ export const getpopular = catchAsyncError(async (req, res, next) => {
 
     }
 
+    return topstocks
+};
 
-    res.status(200).json({
-        success: true,
-        topstocks,
-    });
-});
+export const getall = async (req, res) => {
+    try {
+        const gainer = await fetchTopGainer();
+        const loser = await fetchTopLosers();
+        const popular = await fetchPopularStocks();
+
+        res.status(200).json({ success: true, gainer, loser, popular });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
 
 
