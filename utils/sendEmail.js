@@ -13,8 +13,8 @@ export const sendEmail = async (to, subject, text) => {
         port: 465,
         secure: true,
         auth: {
-            user: "stockportfoliox@gmail.com",
-            pass: "mtjjyzpfeippifdp",
+            user: "niharpatel4444@gmail.com",
+            pass: "muzy ywwx dtqy nnfp",
         },
     });
     await transporter.sendMail({

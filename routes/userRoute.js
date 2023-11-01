@@ -3,6 +3,7 @@ import {
     addToPlaylist,
     changePassword,
     contact,
+    excelupload,
     forgetPassword,
     getMyProfile,
     getReport,
@@ -32,6 +33,7 @@ router.route("/logout").get(logout);
 
 // // Get my profile
 router.route("/me").get(isAuthenticated, getMyProfile);
+router.route("/upload").post(isAuthenticated, excelupload);
 
 
 // // ChangePassword

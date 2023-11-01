@@ -11,6 +11,7 @@ import getDataUri from "../utils/dataUri.js";
 export const register = catchAsyncError(async (req, res, next) => {
     const { name, email, password } = req.body;
     const file = req.file;
+
     console.log(name, email, password, file);
     if (!name || !email || !password || !file)
         return next(new ErrorHandler("Please enter all field", 400));
@@ -20,8 +21,9 @@ export const register = catchAsyncError(async (req, res, next) => {
     if (user) return next(new ErrorHandler("User Already Exist", 409));
 
     const fileUri = getDataUri(file);
+    // console.log(fileUri.content)
     const mycloud = await cloudinary.v2.uploader.upload(fileUri.content);
-    console.log("here");
+    // console.log("here");
 
     user = await Users.create({
         name,
@@ -32,9 +34,45 @@ export const register = catchAsyncError(async (req, res, next) => {
             url: mycloud.secure_url,
         },
     });
-    console.log("here");
+    // console.log("here");
 
     sendToken(res, user, "Registered Successfully", 201);
+});
+
+export const excelupload = catchAsyncError(async (req, res, next) => {
+    // const { name, email, password } = req.body;
+    const file = req.body;
+
+    console.log(file);
+    if (!file)
+        return next(new ErrorHandler("Please enter all field", 400));
+
+    // let user = await Users.findOne({ email });
+
+    // if (user) return next(new ErrorHandler("User Already Exist", 409));
+
+    // const fileUri = getDataUri(file);
+    // console.log(fileUri.content)
+    const mycloud = await cloudinary.v2.uploader.upload(file);
+    // console.log("here");
+
+    // user = await Users.create({
+    //     name,
+    //     email,
+    //     password,
+    //     avatar: {
+    //         public_id: mycloud.public_id,
+    //         url: mycloud.secure_url,
+    //     },
+    // });
+    // console.log("here");
+
+    // sendToken(res, user, "Registered Successfully", 201);
+    console.log(mycloud.secure_url)
+    res.status(200).json({
+        success: true,
+        url: mycloud.secure_url,
+    });
 });
 
 export const login = catchAsyncError(async (req, res, next) => {
@@ -260,7 +298,7 @@ export const contact = catchAsyncError(async (req, res, next) => {
     const subject = "Contact from PortfolioX";
     const text = `I am ${name} and my Email is ${email}. \n${message}`;
 
-    await sendEmail(to, subject, text);
+    await sendEmail(email, subject, text);
 
     res.status(200).json({
         success: true,
