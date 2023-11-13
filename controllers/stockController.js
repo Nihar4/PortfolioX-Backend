@@ -3,9 +3,7 @@ import axios from "axios";
 import { Stock } from "../models/stock.js";
 import { Users } from "../models/user.js";
 
-
 export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
-    // const temp = Stock.create({});
     try {
         const { number } = req.body;
 
@@ -42,7 +40,7 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
             });
         }
 
-        const partNumber = number - 1; // Adjust for 0-based array index
+        const partNumber = number - 1;
         const selectedPart = parts[partNumber];
 
         const logoData = await Promise.all(
@@ -53,7 +51,6 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
             })
         );
 
-        // Filter and process logoData as needed
         const filteredLogoData = logoData.filter((item) => (
             item !== null &&
             item.regularMarketChangeRS !== null &&
@@ -103,7 +100,6 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
             success: true,
         });
     } catch (error) {
-        console.log("error2 ", error);
         res.status(400).json({
             error: true,
         });
@@ -139,7 +135,7 @@ const fetchStockDataWithRetries = async (url, url1) => {
     try {
         const response = await axios.get(url1);
         const closeArray = response.data.chart.result[0].indicators.quote[0].close;
-        if (closeArray === undefined) { console.log("not found Array"); return null; }
+        if (closeArray === undefined) { return null; }
 
         let secondToLastValue = null, lastValue = null;
         if (closeArray.length >= 2) {
@@ -147,7 +143,6 @@ const fetchStockDataWithRetries = async (url, url1) => {
             secondToLastValue = lastTwoValues[0];
             lastValue = lastTwoValues[1];
         } else {
-            console.log("Array has fewer than 2 values");
             return null;
         }
         if (secondToLastValue === null || lastValue === null) {
@@ -159,9 +154,6 @@ const fetchStockDataWithRetries = async (url, url1) => {
         const regularMarketChangePercent = secondToLastValue == null ? 0 : regularMarketChangeRS / secondToLastValue * 100;
         const regularMarketPreviousClose = secondToLastValue;
 
-        // console.log(symbol, CurrentPrice, regularMarketChangeRS, regularMarketChangePercent, regularMarketPreviousClose);
-
-
         return {
             symbol: symbol,
             CurrentPrice: CurrentPrice === undefined ? null : CurrentPrice,
@@ -171,16 +163,8 @@ const fetchStockDataWithRetries = async (url, url1) => {
         };
     } catch (error) {
         if (error.response && error.response.status === 429) {
-            console.log("429");
-            // If a 429 error is encountered, wait for a while before retrying
-            // await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 5 seconds (adjust as needed)
-            // Then retry the request
-            // return fetchStockDataWithRetries(url, url1);
-
             return null;
         } else {
-            console.log(error)
-            console.log(`Error fetching data for ${url1}`);
             return null;
         }
     }
@@ -195,10 +179,8 @@ export const BookmarkData = catchAsyncError(async (req, res, next) => {
             const url = `https://query1.finance.yahoo.com/v7/finance/options/${symbol.symbol}?modules=financialData`;
             const url1 = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol.symbol}?region=US&lang=en-US&includePrePost=false&interval=1d&range=5d&corsDomain=finance.yahoo.com&.tsrc=financed`;
 
-            // Fetch additional data including the name
             const additionalData = await fetchAdditionalData(url);
 
-            // Combine additional data with the existing data
             return {
                 ...additionalData,
                 ...await fetchStockDataWithRetries(url, url1)
@@ -220,8 +202,6 @@ export const PortfolioData = catchAsyncError(async (req, res, next) => {
             const url1 = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol.symbol}?region=US&lang=en-US&includePrePost=false&interval=1d&range=5d&corsDomain=finance.yahoo.com&.tsrc=financed`;
             const response = await axios.get(url1);
             const CurrentPrice = response.data.chart.result[0].meta.regularMarketPrice;
-
-            // Create a new object that includes all properties from the original symbol object
             symbol.currentprice = CurrentPrice;
 
             return symbol;
@@ -239,14 +219,12 @@ export const PortfolioData = catchAsyncError(async (req, res, next) => {
 async function fetchAdditionalData(url) {
     try {
         const response1 = await axios.get(url);
-
-        // Extract the name from the response (modify this based on the actual response structure)
         const name = response1.data.optionChain.result[0].quote.longName;
 
         return { name };
     } catch (error) {
         console.error('Error fetching additional data:', error);
-        return { name: 'N/A' }; // Provide a default name or error handling as needed
+        return { name: 'N/A' };
     }
 }
 
@@ -254,7 +232,6 @@ async function fetchAdditionalData(url) {
 export const getAllStocks = catchAsyncError(async (req, res, next) => {
     const stocks = await Stock.find({});
 
-    // Extract the four arrays and merge them into a single array
     const allStocks = [
         ...stocks[0].part1,
         ...stocks[0].part2,
@@ -287,8 +264,6 @@ const fetchTopGainer = async () => {
         ...stocks[0].part8, // Include part5
         // Include part5
     ];
-    console.log(allStocks.length)
-    // Sort allStocks by regularMarketChangePercent in descending order
     allStocks.sort((a, b) => b.regularMarketChangePercent - a.regularMarketChangePercent);
 
     // Get the top 5 stocks
@@ -302,18 +277,12 @@ const fetchTopGainer = async () => {
         try {
             let name = response1.data.optionChain.result[0].quote.longName;
             if (name === undefined || name === null) {
-                // console.log("not found")
+                console.log("not found")
             }
             else {
-                // console.log(name)
                 let temp = allStocks[idx];
-                // console.log(name)
                 temp.name = name;
-                // console.log(temp)
-                topstocks.push(temp);
-                // topstocks.back().name = name;
-                // allStocks[idx].name = 
-                // allStocks[idx]
+                topstocks.push(temp)
                 cnt = cnt + 1;
             }
 
@@ -336,14 +305,13 @@ const fetchTopLosers = async () => {
         ...stocks[0].part5,
         ...stocks[0].part6,
         ...stocks[0].part7,
-        ...stocks[0].part8, // Include part5
-        // Include part5
+        ...stocks[0].part8,
+
     ];
 
-    // Sort allStocks by regularMarketChangePercent in ascending order for losers
+
     allStocks.sort((a, b) => a.regularMarketChangePercent - b.regularMarketChangePercent);
 
-    // Get the top 5 stocks
     let cnt = 0;
     let idx = 0;
     let topstocks = [];
@@ -354,13 +322,8 @@ const fetchTopLosers = async () => {
         try {
             let name = response1.data.optionChain.result[0].quote.longName;
             let temp = allStocks[idx];
-            // console.log(name)
             temp.name = name;
-            // console.log(temp)
             topstocks.push(temp);
-            // topstocks.back().name = name;
-            // allStocks[idx].name = 
-            // allStocks[idx]
             cnt = cnt + 1;
         } catch (error) {
             console.log("name not found");
@@ -376,10 +339,6 @@ const fetchTopLosers = async () => {
 const fetchPopularStocks = async () => {
     const stocks = await Stock.find({});
     const allStocks = stocks[0].popular;
-    // Sort allStocks by regularMarketChangePercent in ascending order for losers
-    // allStocks.sort((a, b) => a.regularMarketChangePercent - b.regularMarketChangePercent);
-
-    // Get the top 5 stocks
     let cnt = 0;
     let idx = 0;
     let topstocks = [];
@@ -390,13 +349,8 @@ const fetchPopularStocks = async () => {
         try {
             let name = response1.data.optionChain.result[0].quote.longName;
             let temp = allStocks[idx];
-            // console.log(name)
             temp.name = name;
-            // console.log(temp)
             topstocks.push(temp);
-            // topstocks.back().name = name;
-            // allStocks[idx].name = 
-            // allStocks[idx]
             cnt = cnt + 1;
         } catch (error) {
             console.log("name not found");

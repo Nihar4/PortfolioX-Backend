@@ -11,8 +11,6 @@ import getDataUri from "../utils/dataUri.js";
 export const register = catchAsyncError(async (req, res, next) => {
     const { name, email, password } = req.body;
     const file = req.file;
-
-    console.log(name, email, password, file);
     if (!name || !email || !password || !file)
         return next(new ErrorHandler("Please enter all field", 400));
 
@@ -21,9 +19,8 @@ export const register = catchAsyncError(async (req, res, next) => {
     if (user) return next(new ErrorHandler("User Already Exist", 409));
 
     const fileUri = getDataUri(file);
-    // console.log(fileUri.content)
+
     const mycloud = await cloudinary.v2.uploader.upload(fileUri.content);
-    // console.log("here");
 
     user = await Users.create({
         name,
@@ -34,46 +31,9 @@ export const register = catchAsyncError(async (req, res, next) => {
             url: mycloud.secure_url,
         },
     });
-    // console.log("here");
-
     sendToken(res, user, "Registered Successfully", 201);
 });
 
-export const excelupload = catchAsyncError(async (req, res, next) => {
-    // const { name, email, password } = req.body;
-    const file = req.body;
-
-    console.log(file);
-    if (!file)
-        return next(new ErrorHandler("Please enter all field", 400));
-
-    // let user = await Users.findOne({ email });
-
-    // if (user) return next(new ErrorHandler("User Already Exist", 409));
-
-    // const fileUri = getDataUri(file);
-    // console.log(fileUri.content)
-    const mycloud = await cloudinary.v2.uploader.upload(file);
-    // console.log("here");
-
-    // user = await Users.create({
-    //     name,
-    //     email,
-    //     password,
-    //     avatar: {
-    //         public_id: mycloud.public_id,
-    //         url: mycloud.secure_url,
-    //     },
-    // });
-    // console.log("here");
-
-    // sendToken(res, user, "Registered Successfully", 201);
-    console.log(mycloud.secure_url)
-    res.status(200).json({
-        success: true,
-        url: mycloud.secure_url,
-    });
-});
 
 export const login = catchAsyncError(async (req, res, next) => {
     const { email, password } = req.body;
@@ -156,7 +116,6 @@ export const updateProfile = catchAsyncError(async (req, res, next) => {
 
 export const updateprofilepicture = catchAsyncError(async (req, res, next) => {
     const file = req.file;
-    console.log(file)
     if (!file) {
         return next(new ErrorHandler("Please Select the Image TO Update ", 400));
     }
@@ -194,7 +153,6 @@ export const forgetPassword = catchAsyncError(async (req, res, next) => {
     await user.save();
 
     const message = `Your OTP for Reseting Password is ${otp}.\n Please ignore if you haven't requested this.`;
-    // console.log(message);
     try {
         await sendEmail(user.email, "OTP For Reseting Password", message);
     } catch (error) {
@@ -274,13 +232,11 @@ export const isBookmark = catchAsyncError(async (req, res, next) => {
 export const removeFromPlaylist = catchAsyncError(async (req, res, next) => {
     const user = await Users.findById(req.user._id);
     const { name, symbol } = req.body;
-    console.log(name, symbol)
     const newWatchlist = user.watchlist.filter((item) => {
         if (item.symbol !== symbol) return item;
     });
 
     user.watchlist = newWatchlist;
-    console.log(newWatchlist)
     await user.save();
     res.status(200).json({
         success: true,
@@ -290,7 +246,6 @@ export const removeFromPlaylist = catchAsyncError(async (req, res, next) => {
 
 export const contact = catchAsyncError(async (req, res, next) => {
     const { name, email, message } = req.body;
-    console.log(name, email, message);
     if (!name || !email || !message)
         return next(new ErrorHandler("All fields are mandatory", 400));
 
@@ -319,10 +274,8 @@ export const getReport = catchAsyncError(async (req, res, next) => {
     if (fromDate > toDate) {
         return next(new ErrorHandler("Please Enter Valid Date", 400));
     }
-    console.log(user)
     if (user.History.length > 0) {
         user.History.map((item, index) => {
-            console.log(item.date)
             const item1Date = new Date(item.date);
             if (item1Date >= fromDate && item1Date <= toDate) {
                 const temp = {
