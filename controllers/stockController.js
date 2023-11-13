@@ -227,7 +227,6 @@ export const PortfolioData = catchAsyncError(async (req, res, next) => {
             return symbol;
         })
     );
-    console.log(logoData)
     res.status(200).json({
         success: true,
         logoData,
