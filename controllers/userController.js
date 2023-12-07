@@ -199,10 +199,11 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
 
 export const addToPlaylist = catchAsyncError(async (req, res, next) => {
     const user = await Users.findById(req.user._id);
-    const { name, symbol } = req.body;
+    const { name, symbol, id } = req.body;
     user.watchlist.push({
         name: name,
-        symbol: symbol
+        symbol: symbol,
+        id: id
     });
 
     await user.save();
@@ -231,7 +232,7 @@ export const isBookmark = catchAsyncError(async (req, res, next) => {
 
 export const removeFromPlaylist = catchAsyncError(async (req, res, next) => {
     const user = await Users.findById(req.user._id);
-    const { name, symbol } = req.body;
+    const { name, symbol, id } = req.body;
     const newWatchlist = user.watchlist.filter((item) => {
         if (item.symbol !== symbol) return item;
     });
