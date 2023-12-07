@@ -182,6 +182,7 @@ export const BookmarkData = catchAsyncError(async (req, res, next) => {
             const additionalData = await fetchAdditionalData(url);
 
             return {
+                id: symbol.id,
                 ...additionalData,
                 ...await fetchStockDataWithRetries(url, url1)
             };
