@@ -6,6 +6,7 @@ const schema = new mongoose.Schema({
         default: Date.now,
     },
     part1: [{
+        id: String,
         name: String,
         symbol: String,
         CurrentPrice: Number,
@@ -14,6 +15,7 @@ const schema = new mongoose.Schema({
         regularMarketChangePercent: Number,
     }],
     part2: [{
+        id: String,
         name: String,
         symbol: String,
         CurrentPrice: Number,
@@ -22,6 +24,7 @@ const schema = new mongoose.Schema({
         regularMarketChangePercent: Number,
     }],
     part3: [{
+        id: String,
         name: String,
         symbol: String,
         CurrentPrice: Number,
@@ -30,6 +33,7 @@ const schema = new mongoose.Schema({
         regularMarketChangePercent: Number,
     }],
     part4: [{
+        id: String,
         name: String,
         symbol: String,
         CurrentPrice: Number,
@@ -38,6 +42,7 @@ const schema = new mongoose.Schema({
         regularMarketChangePercent: Number,
     }],
     part5: [{
+        id: String,
         name: String,
         symbol: String,
         CurrentPrice: Number,
@@ -46,6 +51,7 @@ const schema = new mongoose.Schema({
         regularMarketChangePercent: Number,
     }],
     part6: [{
+        id: String,
         name: String,
         symbol: String,
         CurrentPrice: Number,
@@ -54,6 +60,7 @@ const schema = new mongoose.Schema({
         regularMarketChangePercent: Number,
     }],
     part7: [{
+        id: String,
         name: String,
         symbol: String,
         CurrentPrice: Number,
@@ -62,6 +69,7 @@ const schema = new mongoose.Schema({
         regularMarketChangePercent: Number,
     }],
     part8: [{
+        id: String,
         name: String,
         symbol: String,
         CurrentPrice: Number,

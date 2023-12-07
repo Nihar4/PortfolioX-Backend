@@ -280,8 +280,11 @@ const fetchTopGainer = async () => {
                 console.log("not found")
             }
             else {
+                const url = `https://groww.in/v1/api/search/v1/entity?app=false&page=0&q=${inputValue}&size=100`;
+                const { data } = await axios.get(url);
                 let temp = allStocks[idx];
                 temp.name = name;
+                temp.id = data.content[0].search_id;
                 topstocks.push(temp)
                 cnt = cnt + 1;
             }
@@ -320,10 +323,12 @@ const fetchTopLosers = async () => {
         const url = `https://query1.finance.yahoo.com/v7/finance/options/${s}?modules=financialData`;
         const response1 = await axios.get(url);
         try {
-            let name = response1.data.optionChain.result[0].quote.longName;
+            const url = `https://groww.in/v1/api/search/v1/entity?app=false&page=0&q=${inputValue}&size=100`;
+            const { data } = await axios.get(url);
             let temp = allStocks[idx];
             temp.name = name;
-            topstocks.push(temp);
+            temp.id = data.content[0].search_id;
+            topstocks.push(temp)
             cnt = cnt + 1;
         } catch (error) {
             console.log("name not found");
@@ -347,10 +352,12 @@ const fetchPopularStocks = async () => {
         const url = `https://query1.finance.yahoo.com/v7/finance/options/${s}?modules=financialData`;
         const response1 = await axios.get(url);
         try {
-            let name = response1.data.optionChain.result[0].quote.longName;
+            const url = `https://groww.in/v1/api/search/v1/entity?app=false&page=0&q=${inputValue}&size=100`;
+            const { data } = await axios.get(url);
             let temp = allStocks[idx];
             temp.name = name;
-            topstocks.push(temp);
+            temp.id = data.content[0].search_id;
+            topstocks.push(temp)
             cnt = cnt + 1;
         } catch (error) {
             console.log("name not found");
