@@ -78,6 +78,7 @@ const schema = new mongoose.Schema({
         regularMarketChangePercent: Number,
     }],
     popular: [{
+        id: String,
         name: String,
         symbol: String,
         CurrentPrice: Number,
