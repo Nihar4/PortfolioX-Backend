@@ -45,7 +45,7 @@ export const createAllStocksAll = catchAsyncError(async (req, res, next) => {
 
         const logoData = await Promise.all(
             selectedPart.map(async (symbol) => {
-                const url = `https://query1.finance.yahoo.com/v7/finance/options/${symbol}?modules=financialData`;
+                const url = `https://query1.finance.yahoo.com/v6/finance/options/${symbol}?modules=financialData`;
                 const url1 = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?region=US&lang=en-US&includePrePost=false&interval=1d&range=5d&corsDomain=finance.yahoo.com&.tsrc=financed`
                 return fetchStockDataWithRetries(url, url1);
             })
@@ -110,7 +110,7 @@ export const createpopularstocks = catchAsyncError(async (req, res, next) => {
     const selectedPart = ["TCS.NS", "BHARTIARTL.NS", "TATAMOTORS.NS", "ITC.NS", "ICICIBANK.NS"]
     const logoData = await Promise.all(
         selectedPart.map(async (symbol) => {
-            const url = `https://query1.finance.yahoo.com/v7/finance/options/${symbol}?modules=financialData`;
+            const url = `https://query1.finance.yahoo.com/v6/finance/options/${symbol}?modules=financialData`;
             const url1 = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?region=US&lang=en-US&includePrePost=false&interval=1d&range=5d&corsDomain=finance.yahoo.com&.tsrc=financed`
             return fetchStockDataWithRetries(url, url1);
         })
@@ -176,7 +176,7 @@ export const BookmarkData = catchAsyncError(async (req, res, next) => {
 
     const logoData = await Promise.all(
         user.watchlist.map(async (symbol) => {
-            const url = `https://query1.finance.yahoo.com/v7/finance/options/${symbol.symbol}?modules=financialData`;
+            const url = `https://query1.finance.yahoo.com/v6/finance/options/${symbol.symbol}?modules=financialData`;
             const url1 = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol.symbol}?region=US&lang=en-US&includePrePost=false&interval=1d&range=5d&corsDomain=finance.yahoo.com&.tsrc=financed`;
 
             const additionalData = await fetchAdditionalData(url);
@@ -273,7 +273,7 @@ const fetchTopGainer = async () => {
     let topstocks = [];
     while (cnt < 5) {
         const s = allStocks[idx].symbol;
-        const url = `https://query1.finance.yahoo.com/v7/finance/options/${s}?modules=financialData`;
+        const url = `https://query1.finance.yahoo.com/v6/finance/options/${s}?modules=financialData`;
         const response1 = await axios.get(url);
         try {
             let name = response1.data.optionChain.result[0].quote.longName;
@@ -321,7 +321,7 @@ const fetchTopLosers = async () => {
     let topstocks = [];
     while (cnt < 5) {
         const s = allStocks[idx].symbol;
-        const url = `https://query1.finance.yahoo.com/v7/finance/options/${s}?modules=financialData`;
+        const url = `https://query1.finance.yahoo.com/v6/finance/options/${s}?modules=financialData`;
         const response1 = await axios.get(url);
         try {
             let name = response1.data.optionChain.result[0].quote.longName;
@@ -357,7 +357,7 @@ const fetchPopularStocks = async () => {
     let topstocks = [];
     while (cnt < 5) {
         const s = allStocks[idx].symbol;
-        const url = `https://query1.finance.yahoo.com/v7/finance/options/${s}?modules=financialData`;
+        const url = `https://query1.finance.yahoo.com/v6/finance/options/${s}?modules=financialData`;
         const response1 = await axios.get(url);
         try {
             let name = response1.data.optionChain.result[0].quote.longName;
