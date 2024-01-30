@@ -281,7 +281,8 @@ const fetchTopGainer = async () => {
                 console.log("not found")
             }
             else {
-                const url = `https://groww.in/v1/api/search/v1/entity?app=false&page=0&q=${name}&size=100`;
+                const findName = name.split(' ').slice(0, 2).join(' ').replace(/\bLimited\b/g, 'Ltd');
+                const url = `https://groww.in/v1/api/search/v1/entity?app=false&page=0&q=${findName}&size=100`;
                 const { data } = await axios.get(url);
                 let temp = allStocks[idx];
                 temp.name = name;
@@ -291,7 +292,8 @@ const fetchTopGainer = async () => {
             }
 
         } catch (error) {
-            console.log("name not found");
+            console.log(error, url);
+            return;
         }
         idx = idx + 1;
 
@@ -329,7 +331,8 @@ const fetchTopLosers = async () => {
                 console.log("not found")
             }
             else {
-                const url = `https://groww.in/v1/api/search/v1/entity?app=false&page=0&q=${name}&size=100`;
+                const findName = name.split(' ').slice(0, 2).join(' ').replace(/\bLimited\b/g, 'Ltd');
+                const url = `https://groww.in/v1/api/search/v1/entity?app=false&page=0&q=${findName}&size=100`;
                 const { data } = await axios.get(url);
                 let temp = allStocks[idx];
                 temp.name = name;
@@ -339,7 +342,8 @@ const fetchTopLosers = async () => {
             }
 
         } catch (error) {
-            console.log("name not found");
+            console.log(error, url)
+            return;
         }
         idx = idx + 1;
 
@@ -365,7 +369,8 @@ const fetchPopularStocks = async () => {
                 console.log("not found")
             }
             else {
-                const url = `https://groww.in/v1/api/search/v1/entity?app=false&page=0&q=${name}&size=100`;
+                const findName = name.split(' ').slice(0, 2).join(' ').replace(/\bLimited\b/g, 'Ltd');
+                const url = `https://groww.in/v1/api/search/v1/entity?app=false&page=0&q=${findName}&size=100`;
                 const { data } = await axios.get(url);
                 let temp = allStocks[idx];
                 temp.name = name;
@@ -375,7 +380,7 @@ const fetchPopularStocks = async () => {
             }
 
         } catch (error) {
-            console.log("name not found");
+            console.log(error, url);
         }
         idx = idx + 1;
 
