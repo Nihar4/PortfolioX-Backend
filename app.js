@@ -27,12 +27,10 @@ app.use(
 );
 
 // // Importing & Using Routes
-import stock from "./routes/stocksRoute.js";
 import user from "./routes/userRoute.js";
 import payment from "./routes/paymentRoutes.js";
 
 app.use("/api/v1", payment);
-app.use("/api/v1", stock);
 app.use("/api/v1", user);
 
 

@@ -42,9 +42,15 @@ const schema = new mongoose.Schema({
             symbol: {
                 type: String,
             },
-            id: {
-                type: String,
+            exchange: {
+                type: String
             },
+            code: {
+                type: String
+            },
+            logo: {
+                type: String
+            }
         },
     ],
     portfolio: [
@@ -80,6 +86,12 @@ const schema = new mongoose.Schema({
             buyingDateList: {
                 type: [Date],
             },
+            exchange: {
+                type: String
+            },
+            code: {
+                type: String
+            }
         },
     ],
     History: [

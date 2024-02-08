@@ -1,15 +1,13 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import { Users } from "../models/user.js";
 import ErrorHandler from "../utils/errorHandler.js";
-import axios from "axios";
-
 import { Payment } from "../models/payment.js";
 import { stripe } from "../server.js";
 
 export const buySubscription1 = catchAsyncError(async (req, res, next) => {
 
     const user = await Users.findById(req.user._id);
-    const { name, symbol, quantity, avgbuyingprice } = req.body;
+    const { name, symbol, quantity, avgbuyingprice, exchange, code } = req.body;
 
     const { client_secret } = await stripe.paymentIntents.create({
         amount: (parseFloat(quantity) * avgbuyingprice).toFixed(2) * 100,
@@ -34,7 +32,8 @@ export const buySubscription1 = catchAsyncError(async (req, res, next) => {
         subscription: {
             id: client_secret,
             status: "created"
-        }
+        },
+        exchange: exchange, code: code
     })
 
 
@@ -82,7 +81,9 @@ export const paymentVerification1 = catchAsyncError(async (req, res, next) => {
             quantityList: [...stock2.quantityList, stock.quantity],
             buyingPriceList: [...stock2.buyingPriceList, stock.avgbuyingprice],
             buyingDateList: [...stock2.buyingDateList, new Date()],
-            status: [...stock2.status, "Buy"]
+            status: [...stock2.status, "Buy"],
+            exchange: stock.exchange,
+            code: stock.code
 
         })
         user.portfolio = newPortfolio1;
@@ -100,7 +101,9 @@ export const paymentVerification1 = catchAsyncError(async (req, res, next) => {
             quantityList: [stock.quantity],
             buyingPriceList: [stock.avgbuyingprice],
             buyingDateList: [new Date()],
-            status: ["Buy"]
+            status: ["Buy"],
+            exchange: stock.exchange,
+            code: stock.code
 
         })
         user.portfolio = newPortfolio;
@@ -134,13 +137,9 @@ export const getRazorPayKey = catchAsyncError(async (req, res, next) => {
 export const SellStock = catchAsyncError(async (req, res, next) => {
     const user = await Users.findById(req.user._id);
 
-    const { symbol, quantity } = req.body;
+    const { symbol, quantity, CurrentPrice } = req.body;
     const stockItem = user.portfolio.find((item) => item.symbol === symbol);
     const newPortfolio = user.portfolio.filter((item) => item.symbol !== symbol);
-    const url1 = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?region=US&lang=en-US&includePrePost=false&interval=1d&range=5d&corsDomain=finance.yahoo.com&.tsrc=financed`
-    const response = await axios.get(url1);
-
-    const CurrentPrice = response.data.chart.result[0].meta.regularMarketPrice;
 
     if (stockItem.quantity > Number(quantity)) {
         newPortfolio.push({
@@ -152,7 +151,9 @@ export const SellStock = catchAsyncError(async (req, res, next) => {
             quantityList: [...stockItem.quantityList, quantity],
             buyingPriceList: [...stockItem.buyingPriceList, CurrentPrice],
             buyingDateList: [...stockItem.buyingDateList, new Date()],
-            status: [...stockItem.status, "Sell"]
+            status: [...stockItem.status, "Sell"],
+            exchange: stockItem.exchange,
+            code: stockItem.code
         })
         user.portfolio = newPortfolio;
 

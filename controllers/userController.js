@@ -3,7 +3,6 @@ import ErrorHandler from "../utils/errorHandler.js";
 import { Users } from "../models/user.js";
 import { sendToken } from "../utils/sendToken.js";
 import { sendEmail } from "../utils/sendEmail.js";
-import crypto from "crypto";
 import cloudinary from "cloudinary";
 import getDataUri from "../utils/dataUri.js";
 
@@ -199,11 +198,13 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
 
 export const addToPlaylist = catchAsyncError(async (req, res, next) => {
     const user = await Users.findById(req.user._id);
-    const { name, symbol, id } = req.body;
+    const { name, symbol, exchange, code, logo } = req.body;
     user.watchlist.push({
         name: name,
         symbol: symbol,
-        id: id
+        exchange: exchange,
+        code: code,
+        logo: logo
     });
 
     await user.save();
@@ -232,7 +233,7 @@ export const isBookmark = catchAsyncError(async (req, res, next) => {
 
 export const removeFromPlaylist = catchAsyncError(async (req, res, next) => {
     const user = await Users.findById(req.user._id);
-    const { name, symbol, id } = req.body;
+    const { name, symbol, exchange, code } = req.body;
     const newWatchlist = user.watchlist.filter((item) => {
         if (item.symbol !== symbol) return item;
     });

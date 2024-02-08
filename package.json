@@ -30,6 +30,7 @@
     "nodemailer": "^6.9.3",
     "razorpay": "^2.9.0",
     "stripe": "^13.8.0",
-    "validator": "^13.9.0"
+    "validator": "^13.9.0",
+    "ws": "^8.16.0"
   }
 }
